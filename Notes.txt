@@ -1,12 +1,60 @@
 
-##  Download and install chefdk 
-## 
+##  Download and install chefdk
+##
 
 curl  https://packages.chef.io/files/stable/chefdk/2.4.17/el/7/chefdk-2.4.17-1.el7.x86_64.rpm  -o chefdk-2.4.17-1.el7.x86_64.rpm -#
-sudo yum install chefdk-2.4.17-1.el7.x86_64.rpm 
+sudo yum install chefdk-2.4.17-1.el7.x86_64.rpm
 
 
 ##  To install Guest Additions automatically in the Vagrant VM
-## 
+##
 vagrant plugin install vagrant-vbguest
 
+
+##  When installing chef, it installs into /opt/chefdk but creates soft links from /usr/bin to chefdk i.e.:
+##  NOTE:  need to update .bashrc to link git and ruby versions installed in /opt/chefdk/embedded
+##
+ls -l /usr/bin/chef
+lrwxrwxrwx. 1 root root 20 Feb 20 14:18 /usr/bin/chef -> /opt/chefdk/bin/chef
+
+## Enter the below to .bashrc to get environment to point to git and ruby installed with chef.
+##
+eval "$(chef shell-init bash)"
+
+## Jargon Alert !!
+##
+
+   - Programs in Chef called recipe.
+   - recipe:  file that contains chef code (*.rb = ruby)
+   - Chef is Ruby Domain Specific Language
+   - Resource (i.e. file below) building blocks for chef code
+      - defines actions for chef to perform
+      - bracketed by do / end statement pair
+      - Generic layout of resource:
+            <resource_type> '<name>' do
+              <attribute statement>
+            end
+   - Attribute is a parameter to a resource
+
+
+
+hello.rb:
+---------
+
+file 'hello.txt' do
+  content 'Welcome to Finnish Cook'
+end
+
+## To run chef code, call chef-apply, it runs single files of chef .rb code.
+##
+chef-apply hello.rb
+
+## Creates a file called hello.txt with the content described in the chef file
+##
+[vagrant@chefbox share]$ ls -ltr
+total 12
+-rw-r--r--. 1 vagrant vagrant 21 Feb 20 22:55 itchy
+-rw-r--r--. 1 vagrant vagrant 60 Feb 20 23:22 hello.rb
+-rw-r--r--. 1 vagrant vagrant 23 Feb 20 23:24 hello.txt
+[vagrant@chefbox share]$ cat hello.txt
+Welcome to Finnish Cook
