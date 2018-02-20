@@ -1,0 +1,3 @@
+curl  https://packages.chef.io/files/stable/chefdk/2.4.17/el/7/chefdk-2.4.17-1.el7.x86_64.rpm  -o chefdk-2.4.17-1.el7.x86_64.rpm -#
+
+sudo yum install chefdk-2.4.17-1.el7.x86_64.rpm 
