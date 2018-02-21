@@ -1,1 +1,0 @@
-{"rsync":{"/vagrant":{"type":"rsync","guestpath":"/vagrant","hostpath":"/home/map/chef/finnish_cook","disabled":false,"__vagrantfile":true,"owner":"vagrant","group":"vagrant"}},"virtualbox":{"/vagrant/share":{"guestpath":"/vagrant/share","hostpath":"/home/map/chef/finnish_cook/share","disabled":false,"__vagrantfile":true}}}

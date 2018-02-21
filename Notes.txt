@@ -45,6 +45,11 @@ file 'hello.txt' do
   content 'Welcome to Finnish Cook'
 end
 
+## NOTE: file name can be single or double quotes.  Content is an attribute
+## or parameter that is passed to the file resource.
+## https://docs.chef.io/resource_file.html
+##
+
 ## To run chef code, call chef-apply, it runs single files of chef .rb code.
 ##
 chef-apply hello.rb
@@ -58,3 +63,7 @@ total 12
 -rw-r--r--. 1 vagrant vagrant 23 Feb 20 23:24 hello.txt
 [vagrant@chefbox share]$ cat hello.txt
 Welcome to Finnish Cook
+
+
+## Cookstyle: Chef took to check syntax (lint checker)
+## eg.     cookstyle hello.rb
