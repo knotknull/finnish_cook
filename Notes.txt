@@ -67,3 +67,59 @@ Welcome to Finnish Cook
 
 ## Cookstyle: Chef took to check syntax (lint checker)
 ## eg.     cookstyle hello.rb
+
+## Change ruby linter to cookstyle
+##
+1. Start Atom
+2. Atom > Preferences > Install
+3. In Search packages enter linter-rubocop
+4. After install go to settings
+5. In Settings > Command, enter:
+/opt/chefdk/bin/cookstyle
+6. tab out of field
+7. test against a .rb file
+
+## Automate verification w/ inspec
+## inspec: Inspect Infrastructure
+##
+inspec runs tests to validate the infrastructure that is created
+by you chef reciple that you create:
+
+1. create hello_test.rb to hold testing code (_test is a convention)
+NOTE: This test detects the existence of hello.txt as well as its' contents
+
+describe file('hello.txt') do
+  it { should be_file }
+  its('content') { should match('Welcome to Finnish Cook') }
+end
+
+2. At cli run inspec w/ inspec test file
+> inspec exec hello_test.rb
+
+Profile: tests from hello_test.rb (tests from hello_test.rb)
+Version: (not specified)
+Target:  local://
+
+
+  File hello.txt
+     ✔  should be file
+     ✔  content should match "Welcome to Finnish Cook"
+
+Test Summary: 2 successful, 0 failures, 0 skipped
+
+
+Anatomy of a test file
+- Verification building block
+describe <resource_type> '<name>' do
+  <checks>
+end
+
+EXMAPLES at: https://docs.chef.io/inspec_reference.html
+NOTE: resources mentioned in chef recipe will most likely have an 'audit'
+inspec resource by the same name i.e. file.
+
+
+
+
+
+#
