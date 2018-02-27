@@ -125,6 +125,40 @@ inspec resource by the same name i.e. file.
 
 
 
+ - Chef is a declarative language to express desired state (like SQL)
+
+   -----------      ------------
+  |           |    |            |      --------
+  | resources |    | attributes |  -> | recipe |    <-    chef
+  |           |    |            |      --------
+   -----------      ------------
+
+   - chef looks at resources and attributes in recipe and figures out how
+     to get to desired state
+
+   - You specify what end result must look like (desired state) not
+     how to achieve it.
+
+NOTE: can reference env vars as:   "#{ENV['HOME']}
+      variable reference == #{}
+      A string MUST have double quotes if it contains a variable reference to
+      substitute the value of the variable, otherwise it would just print
+      the varialbe name.  ENV variable is referenced as a hash:
+             ${HOME} == #{ENV['HOME']}
+
+     file "#{ENV['HOME']}/stone.txt" do
+       content 'Written to stone.txt'
+     end
+
+
+
+
+
+
+
+
+
+
 
 
 #
