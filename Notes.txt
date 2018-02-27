@@ -37,6 +37,8 @@ eval "$(chef shell-init bash)"
    - Attribute is a parameter to a resource
 
 
+## Chef recipe exmple
+##
 
 hello.rb:
 ---------
@@ -93,6 +95,9 @@ describe file('hello.txt') do
   its('content') { should match('Welcome to Finnish Cook') }
 end
 
+NOTE: brace {} are short cut for do / end
+
+
 2. At cli run inspec w/ inspec test file
 > inspec exec hello_test.rb
 
@@ -114,7 +119,7 @@ describe <resource_type> '<name>' do
   <checks>
 end
 
-EXMAPLES at: https://docs.chef.io/inspec_reference.html
+INSPEC EXMAPLES at: https://docs.chef.io/inspec_reference.html
 NOTE: resources mentioned in chef recipe will most likely have an 'audit'
 inspec resource by the same name i.e. file.
 
