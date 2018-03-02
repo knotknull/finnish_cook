@@ -17,7 +17,8 @@ vagrant plugin install vagrant-vbguest
 ls -l /usr/bin/chef
 lrwxrwxrwx. 1 root root 20 Feb 20 14:18 /usr/bin/chef -> /opt/chefdk/bin/chef
 
-## Enter the below to .bashrc to get environment to point to git and ruby installed with chef.
+## Enter the below to .bashrc to get environment to point to git
+## and ruby installed with chef.
 ##
 eval "$(chef shell-init bash)"
 
@@ -150,15 +151,36 @@ NOTE: can reference env vars as:   "#{ENV['HOME']}
        content 'Written to stone.txt'
      end
 
+## How to do an uninstall (by telling chef what NOT to do)
+##
+##  Resource Driven vs. Attribute Drive unistall
+
+## Resource Driven
+##
+All resources can define what NOT to do.  For example, for file resource you
+can change action.
+
+i.e. implicit default action for file is create action.  To override the
+default action explicitly call the delete action.
+The ":" denotes a constant value (aka ruby symbol)
+
+ file "#{ENV['HOME']}/stone.txt" do
+   action :delete
+ end
+
+NOTE: Cannot provide a default "Undo" function.  Can use limited uninstall using
+Attribute Driven uninstall
+https://code.facebook.com/posts/1909042435988955/facebook-chef-cookbooks/
+
+Scaling systems configuration at Facebook
+https://www.youtube.com/watch?v=-YtZiVxEiJ8
+
+
+## Chef Concepts
+   - recipe:    file containing Chef code
+   - resource:  abstraction for something managed by Chef (i.e. file)
+   - attribute: parameters passed to a resource
 
 
 
-
-
-
-
-
-
-
-
-#
+##
