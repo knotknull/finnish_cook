@@ -191,13 +191,90 @@ creates a sandbox environment that simulates production env.
 
 Test kitchen uses docker to create sandbox env.
 
+> kitchen --version
+Test Kitchen version 1.19.2
+
+kitchen-dokken: test-kitchen plugin that provisions rapid cookbook
+testing and container development using Docker and Chef
+
+Run initialization command for kitchen env:
+> kitchen init --driver=kitchen-dokken --provisioner=dokken
+create  .kitchen.yml
+create  chefignore
+create  test/integration/default
+
+NOTE: creates :
+  .kitchen.yml:  configuration file for sandbox environment
+  chefignore:    configuration file used for when you package up environment
+  test:          creates test directory for inspec tests
+
+## Verify kitchen.yml
+##
+Verify kitchen.yml file using command:  kitchen list
+
+> kitchen list
+Instance          Driver  Provisioner  Verifier  Transport  Last Action    Last Error
+default-centos73  Dokken  Dokken       Inspec    Dokken     <Not Created>  <None>
 
 
+## Create test instance: kitchen create
+##
+> kitchen create --log_level=debug
+-----> Starting Kitchen (v1.19.2)
+-----> Creating <default-centos73>...
+D      driver - pulling chef/chef:latest centos 7.3.1611
+D      driver - pulling chef/chef:latest chef/chef latest
+D      driver - creating volume container chef-latest from chef/chef:latest
+       Creating container chef-latest
+D      driver - create_container args {"name"=>"chef-latest", "Cmd"=>"true", "Image"=>"chef/chef:latest", "HostConfig"=>{"NetworkMode"=>"dokken"}}
+       Creating kitchen sandbox at /home/vagrant/.dokken/kitchen_sandbox/8d7db201dc-default-centos73
+       Creating verifier sandbox at /home/vagrant/.dokken/verifier_sandbox/8d7db201dc-default-centos73
+       Building work image..
+D      driver - starting 8d7db201dc-default-centos73
+       Creating container 8d7db201dc-default-centos73
+D      driver - create_container args {"name"=>"8d7db201dc-default-centos73", "Cmd"=>["sh", "-c", "trap exit 0 SIGTERM; while :; do sleep 1; done"], "Image"=>"8d7db201dc-default-centos73:latest", "Hostname"=>"dokken", "Env"=>nil, "ExposedPorts"=>nil, "Volumes"=>nil, "HostConfig"=>{"Privileged"=>false, "VolumesFrom"=>["chef-latest"], "Binds"=>["/home/vagrant/.dokken/kitchen_sandbox/8d7db201dc-default-centos73:/opt/kitchen", "/home/vagrant/.dokken/verifier_sandbox/8d7db201dc-default-centos73:/opt/verifier"], "Dns"=>nil, "DnsSearch"=>nil, "Links"=>[], "CapAdd"=>[], "CapDrop"=>[], "SecurityOpt"=>[], "NetworkMode"=>"dokken", "PortBindings"=>nil, "Tmpfs"=>{}}, "NetworkingConfig"=>{"EndpointsConfig"=>{"dokken"=>{"Aliases"=>["dokken"]}}}}
+       Finished creating <default-centos73> (1m6.46s).
+-----> Kitchen is finished. (1m7.99s)
 
 
+##  verify test instance was created: kitchen list
+##
+> kitchen list
+Instance          Driver  Provisioner  Verifier  Transport  Last Action  Last Error
+default-centos73  Dokken  Dokken       Inspec    Dokken     Created      <None>
+
+NOTE: Last Action changed from  <Not Created> to Created !!
+
+##  verify the running vm instances via docker
+##
+> docker ps
+docker ps
+CONTAINER ID        IMAGE                                COMMAND                  CREATED             STATUS              PORTS               NAMES
+97c627d7f537        8d7db201dc-default-centos73:latest   "sh -c 'trap exit 0 S"   7 minutes ago       Up 7 minutes                            8d7db201dc-default-centos73
 
 
+##  Login to the running test kitchen vm via: kitchen login default-centos73
+##
+> kitchen login default-centos73
 
+##  Destroy the test kitchen vm via: kitchen destroy default-centos73
+##
+> kitchen destroy default-centos73
+-----> Starting Kitchen (v1.19.2)
+-----> Destroying <default-centos73>...
+       Deleting kitchen sandbox at /home/vagrant/.dokken/kitchen_sandbox/8d7db201dc-default-centos73
+       Deleting verifier sandbox at /home/vagrant/.dokken/verifier_sandbox/8d7db201dc-default-centos73
+       Finished destroying <default-centos73> (0m0.28s).
+-----> Kitchen is finished. (0m1.83s)
+
+# Verify that running instance is destroyed via: kitchen list
+> kitchen list
+Instance          Driver  Provisioner  Verifier  Transport  Last Action    Last Error
+default-centos73  Dokken  Dokken       Inspec    Dokken     <Not Created>  <None>
+
+# Verify that running instance is destroyed via: docker ps
+> docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 
 
 
