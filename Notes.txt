@@ -182,5 +182,27 @@ https://www.youtube.com/watch?v=-YtZiVxEiJ8
    - attribute: parameters passed to a resource
 
 
+##################################################################
+##  Test Kitchen
+##################################################################
+
+Test Kitchen tool to deploy recipes to sandbox environment. Test Kitchen
+creates a sandbox environment that simulates production env.
+
+Test kitchen uses docker to create sandbox env.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ##
