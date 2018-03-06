@@ -277,6 +277,69 @@ default-centos73  Dokken  Dokken       Inspec    Dokken     <Not Created>  <None
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 
 
+###################################################################
+## YAML side note
+###################################################################
+
+http://yaml-online-parser.appspot.com
+
+List: collection of ordered values (sequence)
+---
+- Automate this
+- Automate That
+- Automate the other thing
+
+NOTE: must be at same spacing level, number of spaces doesn't matter as long
+as they are aligned.  Also, lists can be entered as [1,2,3].  Put lists inside
+of lists with additional dashes:
+- item 1
+- item 2
+  - item 2.1
+  - item 2.2
+-item 3
+
+# for comments
+Name/Value:  aka Map, Dictionary.  key / value pairs
+url: http://x1.com
+port: 8080
+mode: 0664
+
+# Nested maps via indentation:
+website1:
+  url: http://x1.com
+  port: 8080
+  mode: 0664
+  owner: alice
+website2:
+  url: http://x2.com
+  port: 9090
+  mode: 0644
+  owner: bob
+
+# 1-line form of a hash:
+website2:
+  { url: "http://x2.com", port: 9090, mode: 0644, owner: bob }
+
+
+###################################################################
+## End of YAML side note
+###################################################################
+
+Test Kitchen config file has:
+ - driver:     configure behavior of kitchen driver
+ - transport:  describes networking protocol for host to communicate w/ sandbox
+               (ssh, winrm, or dokken)
+ - provisioner: how to run automation code (aka chefsolo, ansible, dokken)
+                mounts chef code, does not install into vm
+ - platforms:   configures sandbox instance (name and docker image)
+ - verifier:    language to use for test kitchen (i.e. inspec)
+ - suites:      defines parameters for testing
+
+ Test Kitchen Lifecycle:
+
+ kitchen create  ->  kitchen list  ->  kitchen login  ->  kitchen destroy
+
+
 
 
 
