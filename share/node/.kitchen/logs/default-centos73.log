@@ -1,0 +1,4 @@
+I, [2018-03-06T20:50:57.013862 #10962]  INFO -- default-centos73: -----> Destroying <default-centos73>...
+I, [2018-03-06T20:50:57.323996 #10962]  INFO -- default-centos73: Deleting kitchen sandbox at /home/vagrant/.dokken/kitchen_sandbox/47adf156ed-default-centos73
+I, [2018-03-06T20:50:57.324536 #10962]  INFO -- default-centos73: Deleting verifier sandbox at /home/vagrant/.dokken/verifier_sandbox/47adf156ed-default-centos73
+I, [2018-03-06T20:50:57.336659 #10962]  INFO -- default-centos73: Finished destroying <default-centos73> (0m0.31s).
