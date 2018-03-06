@@ -353,6 +353,26 @@ includes: physical, virtual, cloud and container.
  - Node needs chef client installed to be managed by chef.
 
 
+###################################################################
+## How to install Chef on a production node
+###################################################################
+
+Download chef client package at https://downloads.chef.io
+or
+at https://docs.chef.io/install_omnibus.html via curl:
+
+curl -L https://omnitruck.chef.io/install.sh | sudo bash
+
+NOTE: Chefdk contains chef-client but chef-client is smaller
+
+
+
+
+
+
+
+
+
 
 
 
