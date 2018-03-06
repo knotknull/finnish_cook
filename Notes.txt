@@ -340,6 +340,19 @@ Test Kitchen config file has:
  kitchen create  ->  kitchen list  ->  kitchen login  ->  kitchen destroy
 
 
+###################################################################
+## Chef environment determination
+###################################################################
+
+Chef uses ohai to determine inventory of machines it manages
+
+node: a machine that is managed by chef, runs recipes to get desired state.
+includes: physical, virtual, cloud and container.
+          switches, routers, storage, phones, watches, fitness devices, etc.
+
+ - Node needs chef client installed to be managed by chef.
+
+
 
 
 
