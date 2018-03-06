@@ -365,14 +365,137 @@ curl -L https://omnitruck.chef.io/install.sh | sudo bash
 
 NOTE: Chefdk contains chef-client but chef-client is smaller
 
+# chef-apply vs. chef-client
+ - chef-apply  runs code in a single file
+ - chef-client runs code across many recipe files at once
 
 
+###################################################################
+## Create a Hello World recipe, log style
+###################################################################
+
+> cat hello.rb
+log "Hi world."
+
+chef run: using chef-client to do work in a recipe
+
+/opt/chef/bin/chef-client --local-mode hello.rb
+
+NOTE: --local-mode indicates not to look for chef server.
+
+## this tells chef to print out informative messages
+##
+/opt/chef/bin/chef-client --local-mode hello.rb --log_level info
 
 
+## Chef client modes
+##
+ - Solo mode:    simulates full Chef server instance locally in memory
+          - in-memory server: Chef Zero
+
+ - Client mode:  assumes Chef server is running
+      - Server is contacted during Chef run to share state
+        with other nodes
 
 
+###################################################################
+## Oh, Hi or OHAI
+###################################################################
 
+OHAI:
+  - collects system information as a set of attributes
 
+  > /opt/chef/bin/ohia
+
+  To get certain attribues, pass in key value of that attribute to OHAI
+
+  > ohai memory
+
+> /opt/chef/bin/ohai platform
+[2018-03-06T20:45:34+00:00] INFO: The plugin path /etc/chef/ohai/plugins does not exist. Skipping...
+[
+  "centos"
+]
+# /opt/chef/bin/ohai platform_version
+[2018-03-06T20:45:38+00:00] INFO: The plugin path /etc/chef/ohai/plugins does not exist. Skipping...
+[
+  "7.3.1611"
+]
+
+# /opt/chef/bin/ohai memory/total
+[2018-03-06T20:47:48+00:00] INFO: The plugin path /etc/chef/ohai/plugins does not exist. Skipping...
+[
+  "500108kB"
+]
+# /opt/chef/bin/ohai memory/free
+[2018-03-06T20:47:53+00:00] INFO: The plugin path /etc/chef/ohai/plugins does not exist. Skipping...
+[
+  "24012kB"
+]
+# /opt/chef/bin/ohai virtualization/system
+[2018-03-06T20:48:08+00:00] INFO: The plugin path /etc/chef/ohai/plugins does not exist. Skipping...
+[
+  "docker"
+]
+
+###################################################################
+## Chef cookbooks
+###################################################################
+
+cookbook:  way to package chef code
+ - represents set of things needed to deploy to nodes
+    i.e. webserver, db, app server
+
+cookbook vs. recipe
+  - cookbook contains many recipes
+  - recipe contains code
+
+cookbook: directory structure that contains info along w/ code
+
+# Create cookbook directory structure with chef
+
+> chef generate cookbook motd
+
+Generating cookbook motd
+- Ensuring correct cookbook file content
+- Ensuring delivery configuration
+- Ensuring correct delivery build cookbook content
+
+Your cookbook is ready. Type `cd motd` to enter it.
+
+There are several commands you can run to get started locally developing and testing your cookbook.
+Type `delivery local --help` to see a full list.
+
+Why not start by writing a test? Tests for the default recipe are stored at:
+
+test/smoke/default/default_test.rb
+
+If you'd prefer to dive right in, the default recipe can be found at:
+
+recipes/default.rb
+
+# Following directory structure created:
+
+motd/
+motd/recipes
+motd/spec
+motd/test
+motd/Berksfile
+motd/chefignore
+motd/LICENSE
+motd/metadata.rb
+motd/README.md
+motd/recipes
+motd/recipes/default.rb
+motd/spec
+motd/spec/spec_helper.rb
+motd/spec/unit
+motd/spec/unit/recipes
+motd/spec/unit/recipes/default_spec.rb
+motd/test:
+motd/test/smoke
+motd/test/smoke/default
+motd/test/smoke/default/default_test.rb
 
 
 
