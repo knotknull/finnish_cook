@@ -498,6 +498,49 @@ motd/test/smoke/default
 motd/test/smoke/default/default_test.rb
 
 
+# Update motd/.kitchen.yml file per previous dokken example to setup
+  sandbox environment
+
+
+
+Run List (located in .kitchen.yml: suites >  runlist):  Specifies the Chef
+   code to evaluate during a Chef run.
+   ex.  recipe[<cookbook_name>::<recipe_name>]
+        recipe[motd::default]
+
+NOTE: Chef looks for recipes in recipes/ folder.
+ex. motd/recipes/default.rb
+
+# kitchen converge: Run recipes in test kitchen.
+NOTE: performs a chef run in one or more sandbox environments.
+      Behind the scenes kitchen converge:
+        1. runs kitchen create to create sandbox environment
+        2. copies cookbook to sandbox environment to /opt/kitchen/cookbooks
+        3. runs chef-client on cookbook code
+
+> kitchen list
+Instance          Driver  Provisioner  Verifier  Transport  Last Action    Last Error
+default-centos73  Dokken  Dokken       Inspec    Dokken     <Not Created>  <None>
+
+> kitchen converge default-centos73
+-----> Starting Kitchen (v1.19.2)
+-----> Creating <default-centos73>...
+       Creating kitchen sandbox at /home/vagrant/.dokken/kitchen_sandbox/91c559a2b3-default-centos73
+       Creating verifier sandbox at /home/vagrant/.dokken/verifier_sandbox/91c559a2b3-default-centos73
+       Building work image..
+       Creating container 91c559a2b3-default-centos73
+       Finished creating <default-centos73> (0m32.98s).
+-----> Converging <default-centos73>...
+       Creating kitchen sandbox in /home/vagrant/.dokken/kitchen_sandbox/91c559a2b3-default-centos73
+       Preparing dna.json
+       Resolving cookbook dependencies with Berkshelf 6.3.1...
+.
+.
+.
+.
+NOTE: weird bug is causing the test not to run
+
+
 
 
 ##
