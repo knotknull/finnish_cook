@@ -522,24 +522,54 @@ NOTE: performs a chef run in one or more sandbox environments.
 Instance          Driver  Provisioner  Verifier  Transport  Last Action    Last Error
 default-centos73  Dokken  Dokken       Inspec    Dokken     <Not Created>  <None>
 
+
 > kitchen converge default-centos73
------> Starting Kitchen (v1.19.2)
+-----> Starting Kitchen (v1.20.0)
 -----> Creating <default-centos73>...
-       Creating kitchen sandbox at /home/vagrant/.dokken/kitchen_sandbox/91c559a2b3-default-centos73
-       Creating verifier sandbox at /home/vagrant/.dokken/verifier_sandbox/91c559a2b3-default-centos73
+       Creating container chef-latest
+       Creating kitchen sandbox at /home/map/.dokken/kitchen_sandbox/98598a5667-default-centos73
+       Creating verifier sandbox at /home/map/.dokken/verifier_sandbox/98598a5667-default-centos73
        Building work image..
-       Creating container 91c559a2b3-default-centos73
-       Finished creating <default-centos73> (0m32.98s).
+       Creating container 98598a5667-default-centos73
+       Finished creating <default-centos73> (0m15.36s).
 -----> Converging <default-centos73>...
-       Creating kitchen sandbox in /home/vagrant/.dokken/kitchen_sandbox/91c559a2b3-default-centos73
+       Creating kitchen sandbox in /home/map/.dokken/kitchen_sandbox/98598a5667-default-centos73
        Preparing dna.json
        Resolving cookbook dependencies with Berkshelf 6.3.1...
-.
-.
-.
-.
-NOTE: weird bug is causing the test not to run
+       Removing non-cookbook files before transfer
+       Preparing validation.pem
+       Preparing client.rb
+Starting Chef Client, version 13.8.5
+[2018-03-13T10:40:33+00:00] WARN: Plugin Network: unable to detect ipaddress
+[2018-03-13T10:40:33+00:00] WARN: Plugin Network: unable to detect ipaddress
+Creating a new client identity for default-centos73 using the validator key.
+resolving cookbooks for run list: ["motd::default"]
+Synchronizing Cookbooks:
+  - motd (0.1.0)
+Installing Cookbook Gems:
+Compiling Cookbooks...
+Converging 0 resources
 
+Running handlers:
+Running handlers complete
+Chef Client finished, 0/0 resources updated in 00 seconds
+       Finished converging <default-centos73> (0m6.66s).
+-----> Kitchen is finished. (0m23.03s)
+
+
+NOTE: There is a weird bug (in dokken?) that causes kitchen converge to fail
+      when you are running it inside of a vm.
+
+
+# kitchen destroy: Tears down test environment
+
+> kitchen destroy                  
+-----> Starting Kitchen (v1.20.0)
+-----> Destroying <default-centos73>...
+       Deleting kitchen sandbox at /home/map/.dokken/kitchen_sandbox/98598a5667-default-centos73
+       Deleting verifier sandbox at /home/map/.dokken/verifier_sandbox/98598a5667-default-centos73
+       Finished destroying <default-centos73> (0m1.17s).
+-----> Kitchen is finished. (0m2.16s)
 
 
 
