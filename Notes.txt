@@ -558,12 +558,22 @@ Chef Client finished, 0/0 resources updated in 00 seconds
 
 
 NOTE: There is a weird bug (in dokken?) that causes kitchen converge to fail
-      when you are running it inside of a vm.
+      when you are running it inside of a vm.  The only way that I could make it
+      work was changing the driver and provisioner in .kitchen.yml to:
+      Make sure kitchen-docker gem is instaleld via:
+      > gem install kitchen-docker
 
+      driver:
+        name: docker
+
+      provisioner:
+        name: chef_zero
+
+NOTE:  The above is in a directory called boyrd (get it ??)
 
 # kitchen destroy: Tears down test environment
 
-> kitchen destroy                  
+> kitchen destroy
 -----> Starting Kitchen (v1.20.0)
 -----> Destroying <default-centos73>...
        Deleting kitchen sandbox at /home/map/.dokken/kitchen_sandbox/98598a5667-default-centos73
