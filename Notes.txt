@@ -563,13 +563,41 @@ NOTE: There is a weird bug (in dokken?) that causes kitchen converge to fail
 
 # kitchen destroy: Tears down test environment
 
-> kitchen destroy                  
+> kitchen destroy
 -----> Starting Kitchen (v1.20.0)
 -----> Destroying <default-centos73>...
        Deleting kitchen sandbox at /home/map/.dokken/kitchen_sandbox/98598a5667-default-centos73
        Deleting verifier sandbox at /home/map/.dokken/verifier_sandbox/98598a5667-default-centos73
        Finished destroying <default-centos73> (0m1.17s).
 -----> Kitchen is finished. (0m2.16s)
+
+
+#####################################################################
+## Test Driven Dev
+#####################################################################
+In .kitchen.yaml
+
+verifier:
+  name: inspec
+
+suites:
+  - name: default
+    run_list:
+      - recipe[motd::default]
+    verifier:
+      inspec_tests:
+        - test/smoke/default
+    attributes:
+
+
+
+
+
+
+
+
+
+
 
 
 
