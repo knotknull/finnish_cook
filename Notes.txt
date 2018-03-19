@@ -797,4 +797,57 @@ tested against.
 
 
 
+12. Run kitchen verify to validate the tests:
+
+motd> kitchen verify
+-----> Starting Kitchen (v1.20.0)
+-----> Verifying <default-centos>...
+       Loaded tests from {:path=>".vagrant.share.motd.test.smoke.default"}
+
+Profile: tests from {:path=>"/vagrant/share/motd/test/smoke/default"} (tests from {:path=>".vagrant.share.motd.test.smoke.default"})
+Version: (not specified)
+Target:  ssh://kitchen@localhost:32776
+
+  File /etc/motd
+     ✔  should be file
+     ✔  content should match /.+/
+  File /etc/profile.d/motd.sh
+     ✔  should be file
+  Command bash --login -i -c 'cd ~'
+     ✔  stdout should match "Effin Moo"
+
+Test Summary: 4 successful, 0 failures, 0 skipped
+       Finished verifying <default-centos> (0m0.31s).
+-----> Kitchen is finished. (0m1.64s)
+
+
+## kitchen test
+##
+
+NOTE:  kitchen test will run the entire kitchen test lifecycle (i.e. CI/CD):
+
+
+   ---------      ---------      ----------      ---------      ---------
+  | kitchen | -> | kitchen | -> | kitchen  | -> | kitchen | -> | kitchen |
+  | destroy |    | create  |    | converge |    | verify  |    | destroy |
+   ---------      ---------      ----------      ---------      ---------
+
+
+## files / default
+##
+
+Chef allows you to provide filter options to use most platform specific files:
+
+files/alice.example.com   # hostname
+files/centos-7.3          # platform-verison
+files/centos-7            # platform-version components
+files/centos              # platform
+files/default             # default  (copy to all nodes)
+
+
+
+
+
+
+
 ##
