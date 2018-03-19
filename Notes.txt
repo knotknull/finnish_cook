@@ -560,8 +560,9 @@ Chef Client finished, 0/0 resources updated in 00 seconds
 NOTE: There is a weird bug (in dokken?) that causes kitchen converge to fail
       when you are running it inside of a vm.  The only way that I could make it
       work was changing the driver and provisioner in .kitchen.yml to:
-      Make sure kitchen-docker gem is instaleld via:
-      > gem install kitchen-docker
+      (Make sure kitchen-docker gem is instaleld via:
+      > gem install kitchen-docker)
+
 
       driver:
         name: docker
@@ -569,7 +570,26 @@ NOTE: There is a weird bug (in dokken?) that causes kitchen converge to fail
       provisioner:
         name: chef_zero
 
-NOTE:  The above is in a directory called boyrd (get it ??)
+
+      boyrd> cat .kitchen.yml
+
+      ---
+      driver:
+        name: docker
+
+      provisioner:
+        name: chef_zero
+
+      verifier:
+        name: inspec
+
+      platforms:
+        - name: centos
+          driver:
+            image: centos:7.3.1611
+
+
+NOTE:  The above is in a directory called boyrd (get it, chef boy-r-dee ??)
 
 # kitchen destroy: Tears down test environment
 
@@ -580,6 +600,200 @@ NOTE:  The above is in a directory called boyrd (get it ??)
        Deleting verifier sandbox at /home/map/.dokken/verifier_sandbox/98598a5667-default-centos73
        Finished destroying <default-centos73> (0m1.17s).
 -----> Kitchen is finished. (0m2.16s)
+
+
+## Build out motd recipes and tests
+##
+  a. Update /etc/motd
+  b. Create default login /etc/profile.d/motd.sh
+
+
+1. First create a test to verify that /etc/motd exists.  Update the following:
+motd/test/smoke/default/default_test.rb:
+
+describe file('/etc/motd') do
+  it { should be_file }
+end
+
+2. Next run kitchen verify to run tests in motd directory:
+
+motd> kitchen verify
+
+NOTE:  This test actually passes because there is a default /etc/motd in
+the image.  The solution is to destroy this kitchen image and create one via
+kitchen create.
+> kitchen destroy
+> kitchen create       # kitchen create, creates a clean sandbox
+> kitchen list
+Instance        Driver  Provisioner  Verifier  Transport  Last Action  Last Error
+default-centos  Docker  ChefZero     Inspec    Ssh        Created      <None>
+> kitchen login default-centos
+> ls -l /etc/motd
+-rw-r--r--. 1 root root 0 Jun  7  2013 /etc/motd
+
+3. Update default_test.rb to test that file is NOT empty via its('content')
+test:
+motd/test/smoke/default/default_test.rb:
+
+describe file('/etc/motd') do
+  it { should be_file }
+  its('content') { should match(/.+/) }
+end
+
+4. Run kitchen verify, this time test fails
+.
+.
+.
+-----> Setting up <default-centos>...
+       Finished setting up <default-centos> (0m0.00s).
+-----> Verifying <default-centos>...
+       Loaded tests from {:path=>".vagrant.share.motd.test.smoke.default"}
+
+Profile: tests from {:path=>"/vagrant/share/motd/test/smoke/default"} (tests from {:path=>".vagrant.share.motd.test.smoke.default"})
+Version: (not specified)
+Target:  ssh://kitchen@localhost:32776
+
+
+  File /etc/motd
+     ✔  should be file
+     ∅  content should match /.+/
+     expected "" to match /.+/
+     Diff:
+     @@ -1,2 +1,2 @@
+     -/.+/
+     +""
+
+
+Test Summary: 1 successful, 1 failure, 0 skipped
+>>>>>> ------Exception-------
+>>>>>> Class: Kitchen::ActionFailed
+>>>>>> Message: 1 actions failed.
+>>>>>>     Verify failed on instance <default-centos>.  Please see .kitchen/logs/default-centos.log for more details
+>>>>>> ----------------------
+>>>>>> Please see .kitchen/logs/kitchen.log for more details
+>>>>>> Also try running `kitchen diagnose --all` for configuration
+
+5.  To add a file to the cookbook (i.e. motd) run chef generate file <filename>:
+> chef generate file motd
+Recipe: code_generator::cookbook_file
+  * directory[/vagrant/share/motd/files/default] action create
+    - create new directory /vagrant/share/motd/files/default
+    - restore selinux security context
+  * template[/vagrant/share/motd/files/default/motd] action create
+    - create new file /vagrant/share/motd/files/default/motd
+    - update content in file /vagrant/share/motd/files/default/motd from none to e3b0c4
+    (diff output suppressed by config)
+    - restore selinux security context
+
+NOTE:  File is created in motd/files/default/<filename>. You can put whatever
+data in this file.
+
+6.  To copy file from cookbook to target use cookbook_file resource:
+https://docs.chef.io/resource_cookbook_file.html
+
+"Use the cookbook_file resource to transfer files from a sub-directory of
+COOKBOOK_NAME/files/ to a specified path located on a host that is running
+the chef-client.""
+
+Update motd/recipes/default.rb as:
+
+cookbook_file '/etc/motd' do
+   source 'motd'
+   mode '0644'
+end
+
+
+7. Run kitchen converge / verify to test file deployment and run tests
+via kitchen converge and kitchen verify
+
+
+> kitchen converge
+Starting Chef Client, version 13.8.5
+[2018-03-19T19:52:26+00:00] WARN: Plugin Network: unable to detect ipaddress
+Creating a new client identity for default-centos using the validator key.
+resolving cookbooks for run list: ["motd::default"]
+Synchronizing Cookbooks:
+  - motd (0.1.0)
+Installing Cookbook Gems:
+Compiling Cookbooks...
+Converging 1 resources
+Recipe: motd::default
+  * cookbook_file[/etc/motd] action create
+    - update content in file /etc/motd from e3b0c4 to a34bb9
+    --- /etc/motd	2013-06-07 14:31:32.000000000 +0000
+    +++ /etc/.chef-motd20180319-171-1mxypaf	2018-03-19 19:52:26.650703170 +0000
+    @@ -1 +1,9 @@
+    +______________
+    +< 'Effin Mooo! >
+    +--------------
+    +       \   ^__^
+    +        \  (oo)\_______
+    +           (__)\       )\/\
+    +               ||----w |
+    +               ||     ||
+
+Running handlers:
+Running handlers complete
+Chef Client finished, 1/1 resources updated in 00 seconds
+Finished converging <default-centos> (0m13.60s).
+-----> Kitchen is finished. (0m15.15s)
+
+> kitchen verify
+[vagrant@chefbox motd]$ kitchen verify
+-----> Starting Kitchen (v1.19.2)
+-----> Setting up <default-centos>...
+       Finished setting up <default-centos> (0m0.00s).
+-----> Verifying <default-centos>...
+       Loaded tests from {:path=>".vagrant.share.motd.test.smoke.default"}
+
+Profile: tests from {:path=>"/vagrant/share/motd/test/smoke/default"} (tests from {:path=>".vagrant.share.motd.test.smoke.default"})
+Version: (not specified)
+Target:  ssh://kitchen@localhost:32777
+
+
+  File /etc/motd
+     ✔  should be file
+     ✔  content should match /.+/
+
+Test Summary: 2 successful, 0 failures, 0 skipped
+       Finished verifying <default-centos> (0m0.30s).
+-----> Kitchen is finished. (0m1.48s)
+
+8.  Update test/smoke/default/default_test.rb to include motd.sh file check
+
+describe file('/etc/profile.d/motd.sh') do
+  it { should be_file }
+end
+
+9.  Create file into cookbook via chef generate file <filename> and update
+contents in motd/files/default/motd.sh:
+> chef generate file motd.sh
+
+Recipe: code_generator::cookbook_file
+  * directory[/vagrant/share/motd/files/default] action create (up to date)
+  * template[/vagrant/share/motd/files/default/motd.sh] action create
+    - create new file /vagrant/share/motd/files/default/motd.sh
+    - update content in file /vagrant/share/motd/files/default/motd.sh from none to e3b0c4
+    (diff output suppressed by config)
+    - restore selinux security context
+
+10. Add cookbook_file resource (command) into recipes/default.rb for motd.sh
+
+cookbook_file '/etc/profile.d/motd.sh' do
+  source 'motd.sh'
+  mode '0755'
+end
+
+11. Add a test to run a command, this is done via inspec command in
+/test/smoke/default/default_test.rb
+
+describe command("bash --login -i -c 'cd ~'") do
+  its('stdout') { should match('Effin Mooo') }
+end
+
+Note: The above command runs an interative login bash shell that cd
+to home directory.  This will force the motd to be displayed and
+tested against.
 
 
 
