@@ -874,10 +874,183 @@ chef generate generator
 MAP: can you believe this non-sense.  Another chef-ism that drives me crazy!!!
 
 
- 
+> chef generate generator
+Copied built-in generator cookbook to /vagrant/share/code_generator
+Add the following to your config file to enable it:
+ chefdk.generator_cookbook "/vagrant/share/code_generator"
+
+
+The following gets created:
+
+ code_generator/
+ ├── files
+ │   └── default
+ │       ├── Berksfile
+ │       ├── build_cookbook
+ │       │   ├── README.md
+ │       │   └── test-fixture-recipe.rb
+ │       ├── chefignore
+ │       ├── cookbook_readmes
+ │       │   ├── README.md
+ │       │   └── README-policy.md
+ │       ├── delivery-config.json
+ │       ├── delivery-project.toml
+ │       ├── gitignore
+ │       ├── repo
+ │       │   ├── cookbooks
+ │       │   │   └── example
+ │       │   │       ├── attributes
+ │       │   │       │   └── default.rb
+ │       │   │       ├── metadata.rb
+ │       │   │       ├── README.md
+ │       │   │       └── recipes
+ │       │   │           └── default.rb
+ │       │   ├── data_bags
+ │       │   │   ├── example
+ │       │   │   │   └── example_item.json
+ │       │   │   └── README.md
+ │       │   ├── dot-chef-repo.txt
+ │       │   ├── environments
+ │       │   │   ├── example.json
+ │       │   │   └── README.md
+ │       │   ├── policies
+ │       │   │   └── README.md
+ │       │   ├── README.md
+ │       │   └── roles
+ │       │       ├── example.json
+ │       │       └── README.md
+ │       ├── spec_helper_policyfile.rb
+ │       └── spec_helper.rb
+ ├── metadata.rb
+ ├── recipes
+ │   ├── app.rb
+ │   ├── attribute.rb
+ │   ├── build_cookbook.rb
+ │   ├── cookbook_file.rb
+ │   ├── cookbook.rb
+ │   ├── helpers.rb
+ │   ├── policyfile.rb
+ │   ├── recipe.rb
+ │   ├── repo.rb
+ │   ├── resource.rb
+ │   └── template.rb
+ └── templates
+     └── default
+         ├── attribute.rb.erb
+         ├── build_cookbook
+         │   ├── Berksfile.erb
+         │   ├── metadata.rb.erb
+         │   └── recipe.rb.erb
+         ├── cookbook_file.erb
+         ├── helpers.rb.erb
+         ├── inspec_default_test.rb.erb
+         ├── kitchen_policyfile.yml.erb
+         ├── kitchen.yml.erb
+         ├── LICENSE.all_rights.erb
+         ├── LICENSE.apachev2.erb
+         ├── LICENSE.gplv2.erb
+         ├── LICENSE.gplv3.erb
+         ├── LICENSE.mit.erb
+         ├── metadata.rb.erb
+         ├── Policyfile.rb.erb
+         ├── README.md.erb
+         ├── recipe.rb.erb
+         ├── recipe_spec.rb.erb
+         ├── repo
+         │   └── gitignore.erb
+         ├── resource.rb.erb
+         └── template.erb
+
+ 19 directories, 58 files
+
+
+Using a template to create a cookbook:
+
+chef generate cookbook -g <path_to>/code_generator
+
+or
+
+create a file ~/.chef/config.rb with the line:
+  chefdk.generator_cookbook = '<path_to>/code_generator'
 
 
 
+Updated code_generator/templates/default/kitchen.yml.erb to :
+
+---
+driver:
+  name: docker
+  run_command: /bin/systemd
+  cap_add:
+    - SYS_ADMIN
+  volume:
+    - /sys/fs/cgroup
+  chef_version: latest
+  privileged: true  # needed for docker / systemd upstart
+  run_command: /usr/lib/systemd/systemd
+  provision_command:
+        - yum -y install lsof which  systemd-sysv initscripts net-tools
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: centos
+    driver:
+      image: centos:7.4.1708
+
+verifier:
+  name: inspec
+
+suites:
+  - name: default
+    run_list:
+      - recipe[<%= cookbook_name %>::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    attributes:
+
+
+NOTE:  This creates a centos 7.4 node and sets up systemd via the
+       run_command / cap_add / volume directives.  Also provision_command
+       utilizes a docker RUN command to install: lsof which systemd-sysv etc.
+
+Test the updated generator template by running:
+> chef generate cookbook gentest -g code_generator
+
+> tree gentest
+gentest
+├── Berksfile
+├── chefignore
+├── LICENSE
+├── metadata.rb
+├── README.md
+├── recipes
+│   └── default.rb
+├── spec
+│   ├── spec_helper.rb
+│   └── unit
+│       └── recipes
+│           └── default_spec.rb
+└── test
+    └── integration
+        └── default
+            └── default_test.rb
+
+NOTE: looks like a version of chef changed from test/smoke to test/integration.
+      Hence updating inspec_tests to test/integration/default
+
+Once code_genterator is setup, update config.rb to utilize it by default:
+
+> ~/.chef/config.rb
+chefdk.generator_cookbook = '~/share/code_generator'
+
+
+Now can generate a cookbook useing code_generator template without having
+to use the -g option
+
+> chef generate cookbook gentest
 
 
 
