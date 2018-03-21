@@ -845,6 +845,44 @@ files/centos              # platform
 files/default             # default  (copy to all nodes)
 
 
+##################################################################
+## regex
+##################################################################
+
+Regular expressions in ruby
+- Enclosed in // or %{}
+     /This is a regular expression/
+     %{This is a regular expression}
+     /.*/
+
+NOTE: backslash to escape:  /\.\/foo/  ==> ./foo
+
+Ruby regex sandbox:   rubular.com
+
+NOTE: Atom plugin: regex-railroad-diagram.  Put cursor on a regex expression
+      and a box w/ railroad diagram will explan what it does
+
+
+##################################################################
+## cookbook generators
+##################################################################
+
+chef generate generator
+
+- generates a customizable cookbook template
+
+MAP: can you believe this non-sense.  Another chef-ism that drives me crazy!!!
+
+
+ 
+
+
+
+
+
+
+
+
 
 
 
