@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 context = ChefDK::Generator.context
+ChefDK::Generator.add_attr_to_context(:copyright_holder,'ME')
+ChefDK::Generator.add_attr_to_context(:license,'apachev2')
+ChefDK::Generator.add_attr_to_context(:email,'ME@example.com')
 cookbook_dir = File.join(context.cookbook_root, context.cookbook_name)
 
 silence_chef_formatter unless context.verbose

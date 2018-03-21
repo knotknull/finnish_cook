@@ -1053,12 +1053,26 @@ to use the -g option
 > chef generate cookbook gentest
 
 
+###############################################################
+## Copyrights
+###############################################################
+Add copyright info to ~/.chef/config.rb
+
+chefdk.generator_cookbook = '~/share/code_generator'
+chefdk.generator.copyright_holder = 'Me'
+chefdk.generator.license = 'apachev2'
+chefdk.generator.email = 'me@example.com'
 
 
+and then update code_generator/recipes/cookbook.rb and recipe.rb
 
+After this line in cookbook.rb and recipe.rb (first line):
+context = ChefDK::Generator.context
 
-
-
+Add the following
+ChefDK::Generator.add_attr_to_context(:copyright_holder,'ME')
+ChefDK::Generator.add_attr_to_context(:license,'apachev2')
+ChefDK::Generator.add_attr_to_context(:email,'ME@example.com')
 
 
 ##
