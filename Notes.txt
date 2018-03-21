@@ -1075,4 +1075,56 @@ ChefDK::Generator.add_attr_to_context(:license,'apachev2')
 ChefDK::Generator.add_attr_to_context(:email,'ME@example.com')
 
 
+
+###############################################################
+## Attributes
+###############################################################
+
+chef client has information stored in a db about a node aka Attribute store or
+Attributes.
+
+  - Cleared and rebuilt from scratch on every chef run
+  - chef-client always has an up-to-date picture of the current state of node
+
+attribute store = ohai info  +  info in chef recipes  +  attribute files
+
+attribute store used to assess:
+    - what changes were made prior to current run
+    - changes that should be made next to bring the node to desired state.
+
+
+
+attributes accessed via node object:  node['ipaddress']
+can be hierarchical keys:  node['virtualization']['system']
+
+attributes can be declared in:
+  recipe files:     recipes/ subdirectory in a cookbook
+  attribute files:  attributes/ subdirectory in a cookbook
+
+NOTE: custom attributes declared in recipes / attributes available via node[]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ##
