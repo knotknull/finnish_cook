@@ -560,8 +560,9 @@ Chef Client finished, 0/0 resources updated in 00 seconds
 NOTE: There is a weird bug (in dokken?) that causes kitchen converge to fail
       when you are running it inside of a vm.  The only way that I could make it
       work was changing the driver and provisioner in .kitchen.yml to:
-      Make sure kitchen-docker gem is instaleld via:
-      > gem install kitchen-docker
+      (Make sure kitchen-docker gem is instaleld via:
+      > gem install kitchen-docker)
+
 
       driver:
         name: docker
@@ -569,7 +570,26 @@ NOTE: There is a weird bug (in dokken?) that causes kitchen converge to fail
       provisioner:
         name: chef_zero
 
-NOTE:  The above is in a directory called boyrd (get it ??)
+
+      boyrd> cat .kitchen.yml
+
+      ---
+      driver:
+        name: docker
+
+      provisioner:
+        name: chef_zero
+
+      verifier:
+        name: inspec
+
+      platforms:
+        - name: centos
+          driver:
+            image: centos:7.3.1611
+
+
+NOTE:  The above is in a directory called boyrd (get it, chef boy-r-dee ??)
 
 # kitchen destroy: Tears down test environment
 
@@ -582,10 +602,402 @@ NOTE:  The above is in a directory called boyrd (get it ??)
 -----> Kitchen is finished. (0m2.16s)
 
 
-#####################################################################
-## Test Driven Dev
-#####################################################################
-In .kitchen.yaml
+## Build out motd recipes and tests
+##
+  a. Update /etc/motd
+  b. Create default login /etc/profile.d/motd.sh
+
+
+1. First create a test to verify that /etc/motd exists.  Update the following:
+motd/test/smoke/default/default_test.rb:
+
+describe file('/etc/motd') do
+  it { should be_file }
+end
+
+2. Next run kitchen verify to run tests in motd directory:
+
+motd> kitchen verify
+
+NOTE:  This test actually passes because there is a default /etc/motd in
+the image.  The solution is to destroy this kitchen image and create one via
+kitchen create.
+> kitchen destroy
+> kitchen create       # kitchen create, creates a clean sandbox
+> kitchen list
+Instance        Driver  Provisioner  Verifier  Transport  Last Action  Last Error
+default-centos  Docker  ChefZero     Inspec    Ssh        Created      <None>
+> kitchen login default-centos
+> ls -l /etc/motd
+-rw-r--r--. 1 root root 0 Jun  7  2013 /etc/motd
+
+3. Update default_test.rb to test that file is NOT empty via its('content')
+test:
+motd/test/smoke/default/default_test.rb:
+
+describe file('/etc/motd') do
+  it { should be_file }
+  its('content') { should match(/.+/) }
+end
+
+4. Run kitchen verify, this time test fails
+.
+.
+.
+-----> Setting up <default-centos>...
+       Finished setting up <default-centos> (0m0.00s).
+-----> Verifying <default-centos>...
+       Loaded tests from {:path=>".vagrant.share.motd.test.smoke.default"}
+
+Profile: tests from {:path=>"/vagrant/share/motd/test/smoke/default"} (tests from {:path=>".vagrant.share.motd.test.smoke.default"})
+Version: (not specified)
+Target:  ssh://kitchen@localhost:32776
+
+
+  File /etc/motd
+     ✔  should be file
+     ∅  content should match /.+/
+     expected "" to match /.+/
+     Diff:
+     @@ -1,2 +1,2 @@
+     -/.+/
+     +""
+
+
+Test Summary: 1 successful, 1 failure, 0 skipped
+>>>>>> ------Exception-------
+>>>>>> Class: Kitchen::ActionFailed
+>>>>>> Message: 1 actions failed.
+>>>>>>     Verify failed on instance <default-centos>.  Please see .kitchen/logs/default-centos.log for more details
+>>>>>> ----------------------
+>>>>>> Please see .kitchen/logs/kitchen.log for more details
+>>>>>> Also try running `kitchen diagnose --all` for configuration
+
+5.  To add a file to the cookbook (i.e. motd) run chef generate file <filename>:
+> chef generate file motd
+Recipe: code_generator::cookbook_file
+  * directory[/vagrant/share/motd/files/default] action create
+    - create new directory /vagrant/share/motd/files/default
+    - restore selinux security context
+  * template[/vagrant/share/motd/files/default/motd] action create
+    - create new file /vagrant/share/motd/files/default/motd
+    - update content in file /vagrant/share/motd/files/default/motd from none to e3b0c4
+    (diff output suppressed by config)
+    - restore selinux security context
+
+NOTE:  File is created in motd/files/default/<filename>. You can put whatever
+data in this file.
+
+6.  To copy file from cookbook to target use cookbook_file resource:
+https://docs.chef.io/resource_cookbook_file.html
+
+"Use the cookbook_file resource to transfer files from a sub-directory of
+COOKBOOK_NAME/files/ to a specified path located on a host that is running
+the chef-client.""
+
+Update motd/recipes/default.rb as:
+
+cookbook_file '/etc/motd' do
+   source 'motd'
+   mode '0644'
+end
+
+
+7. Run kitchen converge / verify to test file deployment and run tests
+via kitchen converge and kitchen verify
+
+
+> kitchen converge
+Starting Chef Client, version 13.8.5
+[2018-03-19T19:52:26+00:00] WARN: Plugin Network: unable to detect ipaddress
+Creating a new client identity for default-centos using the validator key.
+resolving cookbooks for run list: ["motd::default"]
+Synchronizing Cookbooks:
+  - motd (0.1.0)
+Installing Cookbook Gems:
+Compiling Cookbooks...
+Converging 1 resources
+Recipe: motd::default
+  * cookbook_file[/etc/motd] action create
+    - update content in file /etc/motd from e3b0c4 to a34bb9
+    --- /etc/motd	2013-06-07 14:31:32.000000000 +0000
+    +++ /etc/.chef-motd20180319-171-1mxypaf	2018-03-19 19:52:26.650703170 +0000
+    @@ -1 +1,9 @@
+    +______________
+    +< 'Effin Mooo! >
+    +--------------
+    +       \   ^__^
+    +        \  (oo)\_______
+    +           (__)\       )\/\
+    +               ||----w |
+    +               ||     ||
+
+Running handlers:
+Running handlers complete
+Chef Client finished, 1/1 resources updated in 00 seconds
+Finished converging <default-centos> (0m13.60s).
+-----> Kitchen is finished. (0m15.15s)
+
+> kitchen verify
+[vagrant@chefbox motd]$ kitchen verify
+-----> Starting Kitchen (v1.19.2)
+-----> Setting up <default-centos>...
+       Finished setting up <default-centos> (0m0.00s).
+-----> Verifying <default-centos>...
+       Loaded tests from {:path=>".vagrant.share.motd.test.smoke.default"}
+
+Profile: tests from {:path=>"/vagrant/share/motd/test/smoke/default"} (tests from {:path=>".vagrant.share.motd.test.smoke.default"})
+Version: (not specified)
+Target:  ssh://kitchen@localhost:32777
+
+
+  File /etc/motd
+     ✔  should be file
+     ✔  content should match /.+/
+
+Test Summary: 2 successful, 0 failures, 0 skipped
+       Finished verifying <default-centos> (0m0.30s).
+-----> Kitchen is finished. (0m1.48s)
+
+8.  Update test/smoke/default/default_test.rb to include motd.sh file check
+
+describe file('/etc/profile.d/motd.sh') do
+  it { should be_file }
+end
+
+9.  Create file into cookbook via chef generate file <filename> and update
+contents in motd/files/default/motd.sh:
+> chef generate file motd.sh
+
+Recipe: code_generator::cookbook_file
+  * directory[/vagrant/share/motd/files/default] action create (up to date)
+  * template[/vagrant/share/motd/files/default/motd.sh] action create
+    - create new file /vagrant/share/motd/files/default/motd.sh
+    - update content in file /vagrant/share/motd/files/default/motd.sh from none to e3b0c4
+    (diff output suppressed by config)
+    - restore selinux security context
+
+10. Add cookbook_file resource (command) into recipes/default.rb for motd.sh
+
+cookbook_file '/etc/profile.d/motd.sh' do
+  source 'motd.sh'
+  mode '0755'
+end
+
+11. Add a test to run a command, this is done via inspec command in
+/test/smoke/default/default_test.rb
+
+describe command("bash --login -i -c 'cd ~'") do
+  its('stdout') { should match('Effin Mooo') }
+end
+
+Note: The above command runs an interative login bash shell that cd
+to home directory.  This will force the motd to be displayed and
+tested against.
+
+
+
+12. Run kitchen verify to validate the tests:
+
+motd> kitchen verify
+-----> Starting Kitchen (v1.20.0)
+-----> Verifying <default-centos>...
+       Loaded tests from {:path=>".vagrant.share.motd.test.smoke.default"}
+
+Profile: tests from {:path=>"/vagrant/share/motd/test/smoke/default"} (tests from {:path=>".vagrant.share.motd.test.smoke.default"})
+Version: (not specified)
+Target:  ssh://kitchen@localhost:32776
+
+  File /etc/motd
+     ✔  should be file
+     ✔  content should match /.+/
+  File /etc/profile.d/motd.sh
+     ✔  should be file
+  Command bash --login -i -c 'cd ~'
+     ✔  stdout should match "Effin Moo"
+
+Test Summary: 4 successful, 0 failures, 0 skipped
+       Finished verifying <default-centos> (0m0.31s).
+-----> Kitchen is finished. (0m1.64s)
+
+
+## kitchen test
+##
+
+NOTE:  kitchen test will run the entire kitchen test lifecycle (i.e. CI/CD):
+
+
+   ---------      ---------      ----------      ---------      ---------
+  | kitchen | -> | kitchen | -> | kitchen  | -> | kitchen | -> | kitchen |
+  | destroy |    | create  |    | converge |    | verify  |    | destroy |
+   ---------      ---------      ----------      ---------      ---------
+
+
+## files / default
+##
+
+Chef allows you to provide filter options to use most platform specific files:
+
+files/alice.example.com   # hostname
+files/centos-7.3          # platform-verison
+files/centos-7            # platform-version components
+files/centos              # platform
+files/default             # default  (copy to all nodes)
+
+
+##################################################################
+## regex
+##################################################################
+
+Regular expressions in ruby
+- Enclosed in // or %{}
+     /This is a regular expression/
+     %{This is a regular expression}
+     /.*/
+
+NOTE: backslash to escape:  /\.\/foo/  ==> ./foo
+
+Ruby regex sandbox:   rubular.com
+
+NOTE: Atom plugin: regex-railroad-diagram.  Put cursor on a regex expression
+      and a box w/ railroad diagram will explan what it does
+
+
+##################################################################
+## cookbook generators
+##################################################################
+
+chef generate generator
+
+- generates a customizable cookbook template
+
+MAP: can you believe this non-sense.  Another chef-ism that drives me crazy!!!
+
+
+> chef generate generator
+Copied built-in generator cookbook to /vagrant/share/code_generator
+Add the following to your config file to enable it:
+ chefdk.generator_cookbook "/vagrant/share/code_generator"
+
+
+The following gets created:
+
+ code_generator/
+ ├── files
+ │   └── default
+ │       ├── Berksfile
+ │       ├── build_cookbook
+ │       │   ├── README.md
+ │       │   └── test-fixture-recipe.rb
+ │       ├── chefignore
+ │       ├── cookbook_readmes
+ │       │   ├── README.md
+ │       │   └── README-policy.md
+ │       ├── delivery-config.json
+ │       ├── delivery-project.toml
+ │       ├── gitignore
+ │       ├── repo
+ │       │   ├── cookbooks
+ │       │   │   └── example
+ │       │   │       ├── attributes
+ │       │   │       │   └── default.rb
+ │       │   │       ├── metadata.rb
+ │       │   │       ├── README.md
+ │       │   │       └── recipes
+ │       │   │           └── default.rb
+ │       │   ├── data_bags
+ │       │   │   ├── example
+ │       │   │   │   └── example_item.json
+ │       │   │   └── README.md
+ │       │   ├── dot-chef-repo.txt
+ │       │   ├── environments
+ │       │   │   ├── example.json
+ │       │   │   └── README.md
+ │       │   ├── policies
+ │       │   │   └── README.md
+ │       │   ├── README.md
+ │       │   └── roles
+ │       │       ├── example.json
+ │       │       └── README.md
+ │       ├── spec_helper_policyfile.rb
+ │       └── spec_helper.rb
+ ├── metadata.rb
+ ├── recipes
+ │   ├── app.rb
+ │   ├── attribute.rb
+ │   ├── build_cookbook.rb
+ │   ├── cookbook_file.rb
+ │   ├── cookbook.rb
+ │   ├── helpers.rb
+ │   ├── policyfile.rb
+ │   ├── recipe.rb
+ │   ├── repo.rb
+ │   ├── resource.rb
+ │   └── template.rb
+ └── templates
+     └── default
+         ├── attribute.rb.erb
+         ├── build_cookbook
+         │   ├── Berksfile.erb
+         │   ├── metadata.rb.erb
+         │   └── recipe.rb.erb
+         ├── cookbook_file.erb
+         ├── helpers.rb.erb
+         ├── inspec_default_test.rb.erb
+         ├── kitchen_policyfile.yml.erb
+         ├── kitchen.yml.erb
+         ├── LICENSE.all_rights.erb
+         ├── LICENSE.apachev2.erb
+         ├── LICENSE.gplv2.erb
+         ├── LICENSE.gplv3.erb
+         ├── LICENSE.mit.erb
+         ├── metadata.rb.erb
+         ├── Policyfile.rb.erb
+         ├── README.md.erb
+         ├── recipe.rb.erb
+         ├── recipe_spec.rb.erb
+         ├── repo
+         │   └── gitignore.erb
+         ├── resource.rb.erb
+         └── template.erb
+
+ 19 directories, 58 files
+
+
+Using a template to create a cookbook:
+
+chef generate cookbook -g <path_to>/code_generator
+
+or
+
+create a file ~/.chef/config.rb with the line:
+  chefdk.generator_cookbook = '<path_to>/code_generator'
+
+
+
+Updated code_generator/templates/default/kitchen.yml.erb to :
+
+---
+driver:
+  name: docker
+  run_command: /bin/systemd
+  cap_add:
+    - SYS_ADMIN
+  volume:
+    - /sys/fs/cgroup
+  chef_version: latest
+  privileged: true  # needed for docker / systemd upstart
+  run_command: /usr/lib/systemd/systemd
+  provision_command:
+        - yum -y install lsof which  systemd-sysv initscripts net-tools
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: centos
+    driver:
+      image: centos:7.4.1708
 
 verifier:
   name: inspec
@@ -593,11 +1005,115 @@ verifier:
 suites:
   - name: default
     run_list:
-      - recipe[motd::default]
+      - recipe[<%= cookbook_name %>::default]
     verifier:
       inspec_tests:
-        - test/smoke/default
+        - test/integration/default
     attributes:
+
+
+NOTE:  This creates a centos 7.4 node and sets up systemd via the
+       run_command / cap_add / volume directives.  Also provision_command
+       utilizes a docker RUN command to install: lsof which systemd-sysv etc.
+
+Test the updated generator template by running:
+> chef generate cookbook gentest -g code_generator
+
+> tree gentest
+gentest
+├── Berksfile
+├── chefignore
+├── LICENSE
+├── metadata.rb
+├── README.md
+├── recipes
+│   └── default.rb
+├── spec
+│   ├── spec_helper.rb
+│   └── unit
+│       └── recipes
+│           └── default_spec.rb
+└── test
+    └── integration
+        └── default
+            └── default_test.rb
+
+NOTE: looks like a version of chef changed from test/smoke to test/integration.
+      Hence updating inspec_tests to test/integration/default
+
+Once code_genterator is setup, update config.rb to utilize it by default:
+
+> ~/.chef/config.rb
+chefdk.generator_cookbook = '~/share/code_generator'
+
+
+Now can generate a cookbook useing code_generator template without having
+to use the -g option
+
+> chef generate cookbook gentest
+
+
+###############################################################
+## Copyrights
+###############################################################
+Add copyright info to ~/.chef/config.rb
+
+chefdk.generator_cookbook = '~/share/code_generator'
+chefdk.generator.copyright_holder = 'Me'
+chefdk.generator.license = 'apachev2'
+chefdk.generator.email = 'me@example.com'
+
+
+and then update code_generator/recipes/cookbook.rb and recipe.rb
+
+After this line in cookbook.rb and recipe.rb (first line):
+context = ChefDK::Generator.context
+
+Add the following
+ChefDK::Generator.add_attr_to_context(:copyright_holder,'ME')
+ChefDK::Generator.add_attr_to_context(:license,'apachev2')
+ChefDK::Generator.add_attr_to_context(:email,'ME@example.com')
+
+
+
+###############################################################
+## Attributes
+###############################################################
+
+chef client has information stored in a db about a node aka Attribute store or
+Attributes.
+
+  - Cleared and rebuilt from scratch on every chef run
+  - chef-client always has an up-to-date picture of the current state of node
+
+attribute store = ohai info  +  info in chef recipes  +  attribute files
+
+attribute store used to assess:
+    - what changes were made prior to current run
+    - changes that should be made next to bring the node to desired state.
+
+
+
+attributes accessed via node object:  node['ipaddress']
+can be hierarchical keys:  node['virtualization']['system']
+
+attributes can be declared in:
+  recipe files:     recipes/ subdirectory in a cookbook
+  attribute files:  attributes/ subdirectory in a cookbook
+
+NOTE: custom attributes declared in recipes / attributes available via node[]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

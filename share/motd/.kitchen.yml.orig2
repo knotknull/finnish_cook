@@ -1,12 +1,16 @@
 ---
 driver:
-  name: docker
+  name: dokken
+  chef_version: latest
+
+transport:
+  name: dokken
 
 provisioner:
-  name: chef_zero
+  name: dokken
 
 platforms:
-  - name: centos
+  - name: centos73
     driver:
       image: centos:7.3.1611
 
@@ -20,3 +24,4 @@ suites:
     verifier:
       inspec_tests:
         - test/smoke/default
+    attributes:

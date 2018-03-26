@@ -1,0 +1,33 @@
+---
+driver:
+  name: docker
+  run_command: /bin/systemd
+  cap_add:
+    - SYS_ADMIN
+  volume:
+    - /sys/fs/cgroup
+  chef_version: latest
+  privileged: true  # needed for docker / systemd upstart
+  run_command: /usr/lib/systemd/systemd
+  provision_command:
+        - yum -y install lsof which  systemd-sysv initscripts net-tools
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: centos
+    driver:
+      image: centos:7.4.1708
+
+verifier:
+  name: inspec
+
+suites:
+  - name: default
+    run_list:
+      - recipe[<%= cookbook_name %>::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    attributes:
