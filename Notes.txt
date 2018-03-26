@@ -1257,8 +1257,28 @@ NOTE: the new company attribute that was declared in attributes/default.rb
 
 
 
+###############################################################
+## Attribute Precedence
+###############################################################
+
+    -----------------------              -------------------------
+    | Highest Priority    |              |  Automatic (by Ohai)  |
+    -----------------------              -------------------------
+               |
+               |                         -------------------------
+               |                         |  Defined in Recipe    |
+               |                         -------------------------
+               v
+    -----------------------              -------------------------
+    | Lowest  Priority    |              |  Def in Attribute file |
+    -----------------------              -------------------------
 
 
+
+NOTE:  - Ohai values cannot be overriden by chef code.
+       - Recipe attribute values can override attribute file attributes.
+       - Multiple values set at the same level (recipe, etc.) and the
+         last one set wins
 
 
 
