@@ -1,1 +1,1 @@
-default['motd_attributes']['Company'] = "Galacticon Corp"
+default['motd_attributes']['company'] = "Galacticon Corp"
