@@ -20,3 +20,8 @@ cookbook_file '/etc/profile.d/motd.sh' do
   source 'motd.sh'
   mode '0755'
 end
+
+template '/etc/motd' do
+  source 'motd.erb'
+  mode '0644'
+end
