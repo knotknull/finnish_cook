@@ -25,3 +25,5 @@ template '/etc/motd' do
   source 'motd.erb'
   mode '0644'
 end
+
+node.default['motd_attributes']['message'] = "Goovy (not ruby) day"

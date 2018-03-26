@@ -1171,10 +1171,35 @@ This address of this node is 172.17.0.2
 ## Setting Attributes in Recipes
 ###############################################################
 
+Can declare an attribute in a recipe:
+
+      precedence      attribute name      attribute value
+          |              |                   |
+          v              v                   v
+   node.default["apache"]["dir"] = "/etc/apache2"
+     ^
+     |
+  node attribute
+
+NOTE: Custom attributes should use default level of precedence
 
 
+# set node attribute
 
+motd_attributes/recipes/default.rb:
 
+node.default['motd_attributes']['message']= "Goovy (not ruby) day"
+
+NOTE: when using custom attributes, use cookbook name as first
+      attribute hierarchy (node.default['motd_attributes'])
+
+update motd_attributes/templates/motd.erb :
+
+This node is running on <%= node['virtualization']['system'] %>
+This address of this node is <%= node['ipaddress'] %>
+<%= node['motd_attributes']['message'] %>
+
+NOTE:  using the attribute that was declared in recipes/default.rb
 
 
 
