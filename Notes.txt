@@ -1203,6 +1203,63 @@ NOTE:  using the attribute that was declared in recipes/default.rb
 
 
 
+###############################################################
+## Attribute files
+###############################################################
+
+Can set attributes in "special" files called Attribute Files
+
+<cookbook>
+├── attributes
+│   └── default.rb
+
+
+To generate an attribute file:
+
+> chef generate attribute default
+
+Recipe: code_generator::attribute
+  * directory[/vagrant/share/motd_attributes/attributes] action create
+    - create new directory /vagrant/share/motd_attributes/attributes
+    - restore selinux security context
+  * template[/vagrant/share/motd_attributes/attributes/default.rb] action create
+    - create new file /vagrant/share/motd_attributes/attributes/default.rb
+    - update content in file /vagrant/share/motd_attributes/attributes/default.rb from none to e3b0c4
+    (diff output suppressed by config)
+    - restore selinux security context
+
+## Add attributes to default.rb
+
+Use the following format to set an attribute in an attribute file:
+
+precedence    attribute name      attribute value
+    |            |                   |
+    v            v                   v
+default["apache"]["dir"] = "/etc/apache2"
+
+
+NOTE: Omit the node portion.
+
+> motd_attributes/attributes/default.rb:
+
+default['motd_attributes']['Company'] = "Galacticon Corp"
+
+
+add to motd_attributes/templates/motd.erb:
+
+This node is running on <%= node['virtualization']['system'] %>
+This address of this node is <%= node['ipaddress'] %>
+<%= node['motd_attributes']['message'] %>
+Welcome to <%= node['motd_attributes']['company'] %>
+
+NOTE: the new company attribute that was declared in attributes/default.rb
+
+
+
+
+
+
+
 
 
 
