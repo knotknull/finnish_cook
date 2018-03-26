@@ -1094,7 +1094,7 @@ attribute store used to assess:
 
 
 
-attributes accessed via node object:  node['ipaddress']
+attributes accessed via node object:  node['keyname'],  node['ipaddress']
 can be hierarchical keys:  node['virtualization']['system']
 
 attributes can be declared in:
@@ -1102,6 +1102,26 @@ attributes can be declared in:
   attribute files:  attributes/ subdirectory in a cookbook
 
 NOTE: custom attributes declared in recipes / attributes available via node[]
+
+
+create attribute cookbook via code_generator:
+> chef generate cookbook motd_attributes -g code_generator
+
+> chef generate file motd.sh
+
+
+## Template resources:  copy files to a node using resource
+
+https://docs.chef.io/resource_template.html
+  - copies a file from your cookbook to a node, just like resource_cookbook_file
+  - support Embedded RuBy (ERB) macros
+  - Template can use variables and macros embedded in file
+
+  
+
+
+
+
 
 
 
