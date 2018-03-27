@@ -1311,14 +1311,13 @@ Attribute files are read in A-Z file name order (last in wins)
 
 Composed attributes can be bad
 
+Variable is made up of variable reference
 
+attributes/default.rb:
 
-
-
-
-
-
-
+default['motd_attributes']['tomcat_home'] = '/usr/local/tomcat6'
+default['motd_attributes']['tomcat_bin'] = "#{node['motd_attributes']['tomcat_home']}/bin/tomcat"
+# /usr/local/tomcat6/bin/tomcat
 
 
 
