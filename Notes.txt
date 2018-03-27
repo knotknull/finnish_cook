@@ -1298,7 +1298,7 @@ templates/motd.erb:
 default['motd_attributes']['java_home'] = '/opt/java'
 
 
-
+What if you set same setting across two attribute files
 
 
 
