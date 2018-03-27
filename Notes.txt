@@ -1282,6 +1282,28 @@ NOTE:  - Ohai values cannot be overriden by chef code.
 
 
 
+Can have many attribute files.
+
+
+> chef generate attribute java
+Recipe: code_generator::attribute
+  * directory[/vagrant/share/motd_attributes/attributes] action create (up to date)
+  * template[/vagrant/share/motd_attributes/attributes/java.rb] action create
+    - create new file /vagrant/share/motd_attributes/attributes/java.rb
+    - update content in file /vagrant/share/motd_attributes/attributes/java.rb from none to e3b0c4
+    (diff output suppressed by config)
+    - restore selinux security context
+
+templates/motd.erb:
+default['motd_attributes']['java_home'] = '/opt/java'
+
+
+
+
+
+
+
+
 
 
 
