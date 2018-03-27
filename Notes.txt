@@ -1305,6 +1305,20 @@ Attribute files are read in A-Z file name order (last in wins)
 
 
 
+###############################################################
+## Composed Attributes
+###############################################################
+
+Composed attributes can be bad
+
+
+
+
+
+
+
+
+
 
 
 
