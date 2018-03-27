@@ -1321,6 +1321,23 @@ default['motd_attributes']['tomcat_bin'] = "#{node['motd_attributes']['tomcat_ho
 
 
 
+> chef generate attribute tomcat
+default['motd_attributes']['tomcat_home'] = '/usr/local/tomcat8'
+
+NOTE:  Changed tomcat_home value in tomcat attribute file but tomcat_bin
+       was set in default.rb !!
+
+NOTE:  "Composed attributes work like environment variables"
+
+
+
+
+
+
+
+
+
+
 
 
 
