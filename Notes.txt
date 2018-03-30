@@ -1482,13 +1482,13 @@ Then this would act as an "uninstall" by clearing out the motd to blank.
 Attribute Driven Precedence:
 
 
-[            ]
-[            ]    [               ]
-[            ]    [               ]    [               ]
+[------------]
+[            ]    [---------------]
+[            ]    [               ]    [---------------]
 [Site Setting] -> [Region Settings] -> [App Class Settings] -> [Service Settings]
-[            ]    [               ]    [               ]
-[            ]    [               ]
-[            ]
+[            ]    [               ]    [---------------]
+[            ]    [---------------]
+[------------]
 
 NOTE:  Same code can do an uninstall and install simply by changing
        attributes.
