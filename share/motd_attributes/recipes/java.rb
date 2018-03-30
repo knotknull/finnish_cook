@@ -1,5 +1,2 @@
-#
-# Cookbook:: motd_attributes
-# Recipe:: java
-#
-# Copyright:: 2018, The Authors, All Rights Reserved.
+node.default['motd_attributes']['java_home'] = '/opt/java'
+node.default['motd_attributes']['java_bin'] = '/opt/java/bin/java'
