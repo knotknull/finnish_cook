@@ -1495,11 +1495,24 @@ NOTE:  Same code can do an uninstall and install simply by changing
 
 
 
+###############################################################
+## 4 Basic Chef Resources
+###############################################################
+
+cookbook_file: transfers a file from the cookbook to node
+template:      transfers a file from a cookbook to a node with
+               added Embedded Ruby template processing
+package:       installs a package using the appropriate package manager
+               / installer for the node
+service:       manages the lifecycle of a deamon or service
 
 
-
-
-
+Plan for development:
+  1. install nginx package
+  2. start nginx service
+  3. Configure nginx service to start when machine boots
+  4. Write out an HTML home page
+  5. Success criteria: We can see the homepage in a web browser
 
 
 
