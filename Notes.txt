@@ -1399,7 +1399,84 @@ One instance in chef where override precedence is required:
 
 When you want an environment value of override one set in a role
 
-Value in attribute file to override one set in a recipe.
+ - Value in attribute file to override one set in a recipe.
+
+
+change precedence of compnay var to override in attributes/default.rb:
+
+override['motd_attributes']['company'] ='The OverRidden Co'
+
+recipes/default.rb as default setting of :
+
+node.default['motd_attributes']['company'] = "Galacticon Corp"
+
+When mixing precedence (override and default), blahblah wins:
+
+override['motd_attributes']['company'] ='The Galacti-OverRidden-con Co'
+default['motd_attributes']['company'] ='The Galacticon Co'
+
+NOTE: Cannot override an automatic variable set by ohai w/ override.
+
+
+
+###############################################################
+## Attribute Driven Uninstall
+###############################################################
+
+Two ways to perform uninstalls w/ chef:
+  1. Resource  Driven: action remove, action delete
+  1. Attribute Driven: action delete,
+
+
+Attribute driven cookbook:
+https://github.com/facebook/chef-cookbooks/tree/master
+
+
+
+
+
+Copy text from templates/motd.erb to an attribute in attributes/default.rb:
+
+default['motd_attributes']['motd'] = [
+  "This node is running on #{node['virtualization']['system']}",
+  "This address of this node is #{node['ipaddress']}",
+  "#{node['motd_attributes']['message']}",
+  "Welcome to #{node['motd_attributes']['company']}",
+  "JAVA_HOME on this node is #{node['motd_attributes']['java_home']}",
+  "JAVA_BIN  on this node is #{node['motd_attributes']['java_bin']}",
+  "TOMCAT_BIN on this node is #{node['motd_attributes']['tomcat_bin']}",
+]
+
+NOTE:  Had to change the embedded ruby notation of <%= %> to variable
+notation of #{}.
+
+Add code to templates/motd.erb to read motd variable:
+
+<% node['motd_attributes']['motd'].each do :line: -%>
+<%= line %>
+<%= end -%>
+
+
+NOTE: ERB Syntax Expression evaluates an express and inserts the result
+as a string:  <%= EXPRESSION %>     [Angry Squid]
+
+With  -%> trims following line break, i.e. end line above
+
+Code Evaluation:  <% CODE %>   [just <% %>]
+ex.   <% if node['display_ip'] == true -%>     # CODE
+      <%= node['ipaddress'] %>                 # EXPRESSION
+      <% end -%>                               # CODE
+
+With  -%> trims following line break
+With  <%- trims any preceding indentation
+
+
+
+
+
+
+
+
 
 
 
