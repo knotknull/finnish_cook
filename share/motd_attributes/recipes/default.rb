@@ -26,6 +26,6 @@ template '/etc/motd' do
   mode '0644'
 end
 
-node.default['motd_attributes']['message'] = "Goovy (not ruby) day"
-node.default['motd_attributes']['company'] = "Galacticon Corp"
+node.default['motd_attributes']['message'] = 'Goovy (not ruby) day'
+node.default['motd_attributes']['company'] = 'Galacticon Corp'
 include_recipe 'motd_attributes::java'
