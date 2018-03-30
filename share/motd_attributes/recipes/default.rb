@@ -27,5 +27,5 @@ template '/etc/motd' do
 end
 
 node.default['motd_attributes']['message'] = "Goovy (not ruby) day"
-
-include_recipe 'motd_attributes::java' 
+node.default['motd_attributes']['company'] = "Galacticon Corp"
+include_recipe 'motd_attributes::java'

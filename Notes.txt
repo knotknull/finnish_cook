@@ -1372,11 +1372,34 @@ NOTE: Note the node. value.  Since it is outside of attributes need to
 specify node.
 
 Since motd_attributes::java is not in runlist in .kitchen.yml, use the
-include_recipe resource in receipes/default.rb.
+include_recipe resource in receipes/default.rb:
 
-include_recipe 'motd_attributes::java' 
+include_recipe 'motd_attributes::java'
 
 
+###############################################################
+## Override Precedence
+###############################################################
+
+      precedence      attribute name      attribute value
+          |              |                   |
+          v              v                   v
+   node.default["apache"]["dir"] = "/etc/apache2"
+     ^
+     |
+  node attribute
+
+Precedence order:
+Automatic:  attributes discovered by ohai
+Override:   strongest way to set an attribute
+Default:    set in recipes and attribute files
+
+
+One instance in chef where override precedence is required:
+
+When you want an environment value of override one set in a role
+
+Value in attribute file to override one set in a recipe.
 
 
 
