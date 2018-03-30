@@ -1472,6 +1472,30 @@ With  <%- trims any preceding indentation
 
 
 
+Alot of work for what ????
+
+If you now change attribues/default.rb  and change motd to no value:
+default['motd_attributes']['motd'] = []
+
+Then this would act as an "uninstall" by clearing out the motd to blank.
+
+Attribute Driven Precedence:
+
+
+[            ]
+[            ]    [               ]
+[            ]    [               ]    [               ]
+[Site Setting] -> [Region Settings] -> [App Class Settings] -> [Service Settings]
+[            ]    [               ]    [               ]
+[            ]    [               ]
+[            ]
+
+NOTE:  Same code can do an uninstall and install simply by changing
+       attributes.
+
+
+
+
 
 
 

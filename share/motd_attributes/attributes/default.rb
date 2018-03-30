@@ -7,6 +7,11 @@ default['motd_attributes']['tomcat_bin'] = "#{node['motd_attributes']['tomcat_bi
 
 default['motd_attributes']['message'] = 'Goovy (not ruby) day'
 
+# default['motd_attributes']['motd'] = [
+#   "JAVA_BIN  on this node is #{node['motd_attributes']['java_bin']}",
+#   "TOMCAT_BIN on this node is #{node['motd_attributes']['tomcat_bin']}",
+# ]
+
 default['motd_attributes']['motd'] = [
   "This node is running on #{node['virtualization']['system']}",
   "This address of this node is #{node['ipaddress']}",
