@@ -1331,12 +1331,50 @@ NOTE:  "Composed attributes work like environment variables"
 
 
 
+###############################################################
+## Include_Recipe
+###############################################################
+
+Use multiple via include_recipe that isn't on the run list.  Recipes
+files can contain executable code, hence chef only runs the receipes
+specified.
+
+Create second recipe file:
+
+> chef generate recipe java
+  * directory[/vagrant/share/motd_attributes/spec/unit/recipes] action create (up to date)
+  * cookbook_file[/vagrant/share/motd_attributes/spec/spec_helper.rb] action create_if_missing (up to date)
+  * template[/vagrant/share/motd_attributes/spec/unit/recipes/java_spec.rb] action create_if_missing
+    - create new file /vagrant/share/motd_attributes/spec/unit/recipes/java_spec.rb
+    - update content in file /vagrant/share/motd_attributes/spec/unit/recipes/java_spec.rb from none to 951fae
+    (diff output suppressed by config)
+    - restore selinux security context
+  * directory[/vagrant/share/motd_attributes/test/smoke/default] action create
+    - create new directory /vagrant/share/motd_attributes/test/smoke/default
+    - restore selinux security context
+  * template[/vagrant/share/motd_attributes/test/smoke/default/java_test.rb] action create_if_missing
+    - create new file /vagrant/share/motd_attributes/test/smoke/default/java_test.rb
+    - update content in file /vagrant/share/motd_attributes/test/smoke/default/java_test.rb from none to 5569ec
+    (diff output suppressed by config)
+    - restore selinux security context
+  * template[/vagrant/share/motd_attributes/recipes/java.rb] action create
+    - create new file /vagrant/share/motd_attributes/recipes/java.rb
+    - update content in file /vagrant/share/motd_attributes/recipes/java.rb from none to 5db8b2
+    (diff output suppressed by config)
+    - restore selinux security context
 
 
+Add variable to recipes/java.rb:
+node.default['motd_attributes']['java_home'] = '/opt/java'
+node.default['motd_attributes']['java_bin'] = '/opt/java/bin/java'
 
+NOTE: Note the node. value.  Since it is outside of attributes need to
+specify node.
 
+Since motd_attributes::java is not in runlist in .kitchen.yml, use the
+include_recipe resource in receipes/default.rb.
 
-
+include_recipe 'motd_attributes::java' 
 
 
 
