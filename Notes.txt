@@ -1610,10 +1610,21 @@ package 'nginx' do
 end
 
 
+> kitchen converge
+> kitchen verify
+
+NOTE: action have defaults.  For package resource the default is
+      install. Hence, you do not have to specify it.
 
 
+package 'nginx' do
+  action :install
+end
 
+becomes ...      
 
+package 'epel-release'
+package 'nginx'
 
 
 

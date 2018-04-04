@@ -17,12 +17,8 @@
 # limitations under the License.
 
 # Install EPEL (Extra Packages for Enterprise Linux) package before nginx
+
 # This is where nginx package resides
+package 'epel-release'
 
-package 'epel-release' do
-  action :install
-end
-
-package 'nginx' do
-  action :install
-end
+package 'nginx'
