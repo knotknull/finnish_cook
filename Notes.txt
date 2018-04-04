@@ -1553,4 +1553,78 @@ metadata.rb: gets created when generating cookbook.
 
 
 
+
+###############################################################
+## Package Resource
+###############################################################
+
+Install a package on target machine.
+
+1.  Create a test to see if package has been installed
+http:inspec.io/docs/reference/resources/package
+
+Use the package InSpec audit resource to test if the named package
+and/or package version is installed on the system.
+
+describe package('name') do
+  it { should be_installed }
+end
+
+Add to nginx/test/integration/default/default_test.rb
+
+describe package('nginx') do
+  it { should be_installed }
+end
+
+> kitchen list
+> kitchen converge
+> kitchen verify   ## should fail because test looks for nginx / not installed
+
+-----> Starting Kitchen (v1.19.2)
+-----> Setting up <default-centos>...
+       Finished setting up <default-centos> (0m0.00s).
+-----> Verifying <default-centos>...
+       Loaded tests from {:path=>".vagrant.share.nginx.test.integration.default"}
+
+Profile: tests from {:path=>"/vagrant/share/nginx/test/integration/default"} (tests from {:path=>".vagrant.share.nginx.test.integration.default"})
+Version: (not specified)
+Target:  ssh://kitchen@localhost:32768
+
+
+  System Package
+     ∅  nginx should be installed
+     expected that `System Package nginx` is installed
+     Test Summary: 0 successful, 1 failure, 0 skipped
+
+
+2.  Create install package recipe
+Add code to recipe nginx/recipes/default.rb:
+
+# This is where nginx package resides
+package 'epel-release' do
+  action :install
+end
+
+package 'nginx' do
+  action :install
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ##

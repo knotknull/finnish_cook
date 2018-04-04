@@ -15,3 +15,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Install EPEL (Extra Packages for Enterprise Linux) package before nginx
+# This is where nginx package resides
+
+package 'epel-release' do
+  action :install
+end
+
+package 'nginx' do
+  action :install
+end
