@@ -1656,6 +1656,46 @@ NOTE: Need to do two actions for service: enable it and start it.
       This is done in the order that they are entered.
 
 
+###############################################################
+## Verify content
+###############################################################
+
+1.  Add to nginx/test/integration/default/default_test.rb:
+
+## run command to execute curl command and test stdout
+##
+describe command('curl localhost') do
+  its('stdout') { should match('docker') }
+end
+
+
+
+2. Generate a template:
+> chef generate template index.html
+
+Recipe: code_generator::template
+  * directory[/vagrant/share/nginx/templates] action create
+    - create new directory /vagrant/share/nginx/templates
+    - restore selinux security context
+  * template[/vagrant/share/nginx/templates/index.html.erb] action create
+    - create new file /vagrant/share/nginx/templates/index.html.erb
+    - update content in file /vagrant/share/nginx/templates/index.html.erb from none to e3b0c4
+    (diff output suppressed by config)
+    - restore selinux security context
+
+
+3. Create a template with embedded ruby in nginx/tempates/index.html.erb:
+
+This site was setup by <%= node['virtualization']['system'] %>
+
+4. Copy / interpelate the erb template in nginx/recipe/default.rb:
+
+template '/usr/share/nginx/html/index.html' do
+  source 'index.html.erb'
+  mode '0644'
+end
+
+
 
 
 

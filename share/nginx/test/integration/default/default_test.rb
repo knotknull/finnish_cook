@@ -7,3 +7,9 @@ describe service('nginx') do
   it { should be_running }
   it { should be_enabled }
 end
+
+## run command to execute curl command and test stdout
+##
+describe command('curl localhost') do
+  its('stdout') { should match('docker') }
+end
