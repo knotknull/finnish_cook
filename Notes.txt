@@ -1696,7 +1696,6 @@ template '/usr/share/nginx/html/index.html' do
 end
 
 
-NOTE: for some reason this template is being converted to an empty file
 
 ###############################################################
 ## Forward a port
@@ -1713,9 +1712,7 @@ platforms:
 
 
 
-
-
-
+test via:  curl localhost:9080
 
 
 
