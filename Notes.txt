@@ -1516,6 +1516,40 @@ Plan for development:
 
 
 
+Community cookbooks:  https://github.com/chef-cookbooks
+
+
+1. Create new cookbook
+chef generate cookbook nginx -g code_generator
+
+/> tree nginx
+nginx
+├── Berksfile
+├── LICENSE
+├── README.md
+├── chefignore
+├── metadata.rb
+├── recipes
+│   └── default.rb
+├── spec
+│   ├── spec_helper.rb
+│   └── unit
+│       └── recipes
+│           └── default_spec.rb
+└── test
+    └── integration
+        └── default
+            └── default_test.rb
+
+
+Project information located in:
+/README.md:  description of project
+metadata.rb: gets created when generating cookbook.
+
+
+
+
+
 
 
 
