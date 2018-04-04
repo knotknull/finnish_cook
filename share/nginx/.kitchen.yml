@@ -19,6 +19,8 @@ platforms:
   - name: centos
     driver:
       image: centos:7.4.1708
+      forward:
+        - 9080:80
 
 verifier:
   name: inspec

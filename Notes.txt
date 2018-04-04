@@ -1696,6 +1696,27 @@ template '/usr/share/nginx/html/index.html' do
 end
 
 
+NOTE: for some reason this template is being converted to an empty file
+
+###############################################################
+## Forward a port
+###############################################################
+
+Add to .kitchen.yml under platforms, name, driver:
+
+platforms:
+  - name: centos
+  driver:
+  image: centos:7.4.1708
+  forward:
+    - 9080:80
+
+
+
+
+
+
+
 
 
 
