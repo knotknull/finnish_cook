@@ -1621,7 +1621,7 @@ package 'nginx' do
   action :install
 end
 
-becomes ...      
+becomes ...
 
 package 'epel-release'
 package 'nginx'
@@ -1629,6 +1629,31 @@ package 'nginx'
 
 
 
+###############################################################
+## Service Resource
+###############################################################
+
+
+1. Add service test to nginx/test/integration/default/default_test.rb:
+
+describe service('nginx') do
+  it { should be_installed }
+  it { should be_running }
+  it { should be_enabled }
+end
+
+NOTE: be_enabled means enabled to start on boot.
+
+2. Add service start in nginx/recipes.default.rb:
+
+service 'nginx' do
+  action [:enable, :start]
+end
+
+NOTE: Need to do two actions for service: enable it and start it.
+      This is accomplished by passing an array of two actions to the
+      action command:  action[:enable, :start]
+      This is done in the order that they are entered.
 
 
 
