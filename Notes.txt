@@ -1716,6 +1716,156 @@ test via:  curl localhost:9080
 
 
 
+###############################################################
+## Cookbook Versioning
+###############################################################
+
+Versioning updates done to version in metadata.rb i.e.:
+nginx/metadata.rb:
+
+name 'nginx'
+maintainer 'ME'
+maintainer_email 'ME@example.com'
+license 'Apache-2.0'
+description 'Installs/Configures a simple website using Nginx'
+long_description IO.read("#{File.dirname(__FILE__)}/README.md")
+version '0.1.0'
+
+
+
+version => Major.Minor.Patch format: version '0.1.0'
+
+Major:  make incompatible API changes
+Minor:  add functionality in a backwards-compatible manner
+Patch:  make backwards-compatible bug fixes
+
+
+CHANGELOG.md:  Log of changes made (same level as README.md)
+
+community cookbooks at:
+https://supermarket.chef.io
+
+git:
+git init    # initalize git repo
+git add     # add files to git stage
+git status  # shows status of file changes
+git commit -m "Commit Message"    # commit changes
+git logs    # list all changes
+git show <commit_id>   # show actual differences of commit
+git show HEAD   # alias for last commit
+
+
+
+## git add
+
+> git add Notes.txt
+> git add share/nginx/CHANGELOG.md
+
+## git status
+
+> git status
+On branch master
+Your branch is up-to-date with 'origin/master'.
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+	modified:   Notes.txt
+	new file:   share/nginx/CHANGELOG.md
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	.kitchen/
+	.vagrant/
+	share/nginx/.delivery/
+	share/nginx/.gitignore
+
+
+## git log
+
+  > git log
+  commit 549b39c89af6f872002aa713899598990a137a89
+  Author: knotknull <zulu_mcduffy@yahoo.com>
+  Date:   Wed Apr 4 13:42:23 2018 -0400
+
+      updated Notes.txt
+
+  commit f7abbfe974fd49f862a8cee7dea6a1baa1eccf04
+  Author: knotknull <zulu_mcduffy@yahoo.com>
+  Date:   Wed Apr 4 13:36:45 2018 -0400
+
+      port forwarding
+
+
+
+
+## git show <commit_id>
+
+  > git show 0896db876e72
+  commit 0896db876e7246ea45feca3aed263e5c0ca331e2
+  Author: knotknull <zulu_mcduffy@yahoo.com>
+  Date:   Tue Mar 27 16:25:24 2018 -0400
+
+      Updated Notes.txt
+
+  diff --git a/Notes.txt b/Notes.txt
+  index 9fbc82b..3767b3a 100644
+  --- a/Notes.txt
+  +++ b/Notes.txt
+  @@ -1300,6 +1300,10 @@ default['motd_attributes']['java_home'] = '/opt/java'
+
+   What if you set same setting across two attribute files
+
+  +Attribute files are read in A-Z file name order (last in wins)
+  +
+  +
+  +
+
+
+
+
+## git show HEAD
+
+  > git show HEAD
+  commit 549b39c89af6f872002aa713899598990a137a89
+  Author: knotknull <zulu_mcduffy@yahoo.com>
+  Date:   Wed Apr 4 13:42:23 2018 -0400
+
+      updated Notes.txt
+
+  diff --git a/Notes.txt b/Notes.txt
+  index afade5e..99b880e 100644
+  --- a/Notes.txt
+  +++ b/Notes.txt
+  @@ -1696,7 +1696,6 @@ template '/usr/share/nginx/html/index.html' do
+   end
+
+
+  -NOTE: for some reason this template is being converted to an empty file
+
+   ###############################################################
+   ## Forward a port
+  @@ -1713,9 +1712,7 @@ platforms:
+
+
+
+  -
+  -
+  -
+  +test via:  curl localhost:9080
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
