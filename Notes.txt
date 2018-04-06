@@ -1897,6 +1897,10 @@ setup github project on travis-ci.orig, links github account with travis-ci
 
 commit code to github with .travis.yml should trigger a build in travis-ci.org.
 
+NOTE: can use markdown code to place  build / test badges in READM.md
+i.e.
+
+[![Build Status](https://travis-ci.org/misheska-orielly/nginx.svg?branch=master)](https://travis-ci.org/misheska-orielly/nginx)
 
 
 
