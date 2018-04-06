@@ -1878,13 +1878,25 @@ Everything up-to-date
 
 create new file:  .travis.yml
 
+matrix: tag in .travis.yml allows you to run several commands in parallel:
+
+matrix:
+  include:
+    - before_script:
+      - eval "$(/opt/chefdk/bin/chef shell-init bash)"
+      - /opt/chefdk/bin/chef --version
+      - /opt/chefdk/bin/cookstyle --version
+    - script:
+      - /opt/chefdk/bin/chef exec cookstyle
 
 
 
 
+signup https://travis-ci.org
+setup github project on travis-ci.orig, links github account with travis-ci
 
-
-
+commit code to github with .travis.yml should initiate an integration run
+against travis-ci.org.
 
 
 
