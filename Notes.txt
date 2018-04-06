@@ -1,3 +1,5 @@
+## Examples at:
+http://examples.oreilly.com/0636920051381/
 
 ##  Download and install chefdk
 ##
@@ -1901,6 +1903,47 @@ NOTE: can use markdown code to place  build / test badges in READM.md
 i.e.
 
 [![Build Status](https://travis-ci.org/misheska-orielly/nginx.svg?branch=master)](https://travis-ci.org/misheska-orielly/nginx)
+
+
+
+
+
+###############################################################
+## Manage Nginx
+###############################################################
+  - manage nginx.conf
+
+
+1. Generate template files
+chef generate template nginx.conf
+
+2. Copy original nginx.conf file from container to host
+  a. run docker ps to get container id of running image
+  docker ps
+  CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                         NAMES
+  e61088c4fa1e        86a677116ced        "/usr/lib/systemd/sys"   5 minutes ago       Up 5 minutes        0.0.0.0:32768->22/tcp, 0.0.0.0:9080->80/tcp   defaultcentos-vagrant-chefbox-mqkh6o5f
+
+  b. copy file w/ docker cp:
+       docker cp e61088c4fa1e:/etc/nginx/nginx.conf templates/nginx.conf.erb
+
+3. After updating nginx.conf.erb, update recipes/default.rb to manage template
+
+directory '/etc/nginx' do
+  owner 'root'
+  group 'root'
+  mode 0755
+end
+
+template '/etc/nginx/nginx.conf' do
+  source 'nginx.conf.erb'
+  notifies :restart, 'service[nginx]', :immediately
+end
+
+4. Create default website configuration, generate template
+> chef generate template default.conf
+
+5. Copy nginx conf again
+> docker cp e61088c4fa1e:/etc/nginx/nginx.conf templates/default.conf.erb
 
 
 
