@@ -1895,8 +1895,8 @@ matrix:
 signup https://travis-ci.org
 setup github project on travis-ci.orig, links github account with travis-ci
 
-commit code to github with .travis.yml should initiate an integration run
-against travis-ci.org.
+commit code to github with .travis.yml should trigger a build in travis-ci.org.
+
 
 
 
