@@ -1753,8 +1753,8 @@ git commit -m "Commit Message"    # commit changes
 git logs    # list all changes
 git show <commit_id>   # show actual differences of commit
 git show HEAD   # alias for last commit
-
-
+git remote  # show remote repositories
+git push -u origin master   # save commit (-u = upstream) origin master (=branch)
 
 ## git add
 
@@ -1855,7 +1855,28 @@ Untracked files:
   +test via:  curl localhost:9080
 
 
+## git remote
 
+> git remote -v
+origin	https://github.com/knotknull/finnish_cook.git (fetch)
+origin	https://github.com/knotknull/finnish_cook.git (push)
+
+
+# git push
+> git push -u origin master
+Branch master set up to track remote branch master from origin.
+Everything up-to-date
+
+
+
+###############################################################
+## Cookbook Pipelines w/ Travis CI
+###############################################################
+
+
+
+
+create new file:  .travis.yml
 
 
 
