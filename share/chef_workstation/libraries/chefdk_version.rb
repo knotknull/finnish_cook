@@ -1,7 +1,6 @@
 class ChefdkVersion < Inspec.resource(1)
   name 'chefdk_version'
 
-
   def initialize
     chef_ver = inspec.command('/opt/chefdk/bin/chef --version').stdout
     ver=chef_ver.match(/Chef Development Kit Version: (\d+\.\d+\.\d+)/)[1]

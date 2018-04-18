@@ -2544,14 +2544,27 @@ Test Summary: 5 successful, 0 failures, 0 skipped
 
 Allows you to share controls and custom matchers between chef and inspec cookbooks
 
+Can reference compliance profiles via http address directly.
 
 
+https://github.com/dev-sec/nginx-baseline.git
 
 
+nginx/.kitchen.yml:
+.
+.
+.
+suites:
+  - name: default
+    run_list:
+      - recipe[nginx::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+        - https://github.com/dev-sec/nginx-baseline.git
 
 
-
-
+NOTE: See Test Kitchen Verifier fo Inspec: https://github.com/chef/kitchen-inspec
 
 
 

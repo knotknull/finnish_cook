@@ -11,3 +11,7 @@
 # 0.1.1
 
 - Added .travis.yml
+
+# 0.1.2
+
+- Added nginix inspec tests
