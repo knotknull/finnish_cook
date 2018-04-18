@@ -2409,22 +2409,140 @@ end
 
 
 
-
-
-
-
-
-
-
 ###############################################################
 ## Inspec: Create Compliance Profile
 ###############################################################
 
+Compliance Profile Structure:
+  README.md
+  inspec.yml
+  controls/
+
+default_test.rb:
+
+control 'ChefDK is installed' do
+  describe file('/opt/chefdk/bin/chef') do
+    it { should exist }
+  end
+
+  describe command('/opt/chefdk/bin/chef --version') do
+    its('stdout') { should match(/Chef Development Kit Version: [^01]\.\d+\.\d/) }
+  end
+end
+
+
+## Add ruby code to a control
+##
+
+NOTE:  Any control block in inspec can contain ruby code
+
+## Regular Inspec
+##
+control 'ChefDK is installed' do
+  describe file('/opt/chefdk/bin/chef') do
+    it { should exist }
+  end
+
+  describe command('/opt/chefdk/bin/chef --version') do
+    its('stdout') { should match(/Chef Development Kit Version: [^01]\.\d+\.\d/) }
+  end
+end
+
+## Ruby code in control block !!
+##
+control 'ChefDK is at least 2.0.0' do
+  chef_ver=command('/opt/chefdk/bin/chef --version').stdout
+  ver=chef_ver.match(/Chef Development Kit Version: (\d+\.\d+\.\d+)/)[1]
+  major_ver=ver.split('.')[0].to_i
+  minor_ver=ver.split('.')[1].to_i
+  patch_ver=ver.split('.')[2].to_i
+
+  describe(major_ver) do
+    it { should be >= 2}
+  end
+
+  describe(minor_ver) do
+    it { should be >= 4}
+  end
+
+
+  describe(patch_ver) do
+    it { should be >= 0}
+  end
+
+end
+
+
+## Package ruby code
+##
+libraries directory contain custom ruby code. Can export ruby code from
+control block into libraries/chefdk_version.rb and reference class in control block:
+
+libraries/chefdk_version.rb:
+
+class ChefdkVersion < Inspec.resource(1)
+  name 'chefdk_version'
+
+  def initialize
+    chef_ver = inspec.command('/opt/chefdk/bin/chef --version').stdout
+    ver=chef_ver.match(/Chef Development Kit Version: (\d+\.\d+\.\d+)/)[1]
+    @major_ver=ver.split('.')[0]
+    @minor_ver=ver.split('.')[1]
+    @patch_ver=ver.split('.')[2]
+  end
+
+  def major_ver
+    @major_ver.to_i
+  end
+
+  def minor_ver
+    @minor_ver.to_i
+  end
+
+  def patch_ver
+    @patch_ver.to_i
+  end
+
+end
+
+controls/default.rb:
+
+control 'ChefDK is at least 2.0.0' do
+
+    describe(chefdk_version) do
+      its('major_ver') { should be >= 2}
+      its('minor_ver') { should be >= 5}
+      its('patch_ver') { should be >= 0}
+    end
+end
+
+Runnig inspec again gives:
+
+> inspec exec chef_workstation
+
+Profile: Chef Development Workstation Compliance Profile (chef_workstation)
+Version: 1.0.0
+Target:  local://
+
+  ✔  ChefDK is installed: File /opt/chefdk/bin/chef
+     ✔  File /opt/chefdk/bin/chef should exist
+     ✔  Command /opt/chefdk/bin/chef --version stdout should match /Chef Development Kit Version: [^01]\.\d+\.\d/
+  ✔  ChefDK is at least 2.0.0: chefdk_version
+     ✔  chefdk_version major_ver should be >= 2
+     ✔  chefdk_version minor_ver should be >= 5
+     ✔  chefdk_version patch_ver should be >= 0
+
+
+Profile Summary: 2 successful controls, 0 control failures, 0 controls skipped
+Test Summary: 5 successful, 0 failures, 0 skipped
 
 
 
+###############################################################
+## Compliance Profiles w/ Test Kitchen
+###############################################################
 
-
+Allows you to share controls and custom matchers between chef and inspec cookbooks
 
 
 
