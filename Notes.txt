@@ -1972,6 +1972,462 @@ NOTE: notice notifies is reload and not restat
 
 
 
+###############################################################
+## Inspec: Automated Validation
+###############################################################
+
+## Scan a Docker Node
+##
+
+Compliance profile == chef cookbook
+Compliance profile: directory structure where inspec code is packaged
+
+DevSec Hardining Framewrok: https://github.com/dev-sec
+ex.
+  dev-sec/linux-baseline
+  dev-sec/ssh-baseline
+  dev-sec/nginx-baseline
+  dev-sec/apache-baseline
+  dev-sec/openstack-baseline
+  dev-sec/ssl-baseline
+  dev-sec/linux-patch-baseline
+
+
+1. Run linux-baseline against a docker image
+
+2. Start up centos73 image with docker:
+docker run --name mycentos73 --detach --tty --interactive centos:7.3.1611 /bin/bash
+
+3. Clone linux-baseline git repo
+git clone https://github.com/dev-sec/linux-baseline.git
+
+4. Run inspec compliance linux-baseline against docker vm
+NOTE: Must be in directory above linux-baseline git directory
+> ls linux-baseline
+[vagrant@chefbox share]$ ls linux-baseline
+CHANGELOG.md  controls  Gemfile  inspec.yml  libraries  LICENSE  Rakefile  README.md
+
+> inspec exec linux-baseline --target docker://mycentos73
+
+Profile: DevSec Linux Security Baseline (linux-baseline)
+Version: 2.2.0
+Target:  docker://c88afc343e887821364b1edf01345878b45e7f4ef79fba1413cb5a221ac3de54
+
+  ✔  package-01: Do not run deprecated inetd or xinetd
+     ✔  System Package inetd should not be installed
+     ✔  System Package xinetd should not be installed
+  ✔  package-02: Do not install Telnet server
+     ✔  System Package telnetd should not be installed
+  ✔  package-03: Do not install rsh server
+     ✔  System Package telnetd should not be installed
+  ✔  package-05: Do not install ypserv server (NIS)
+     ✔  System Package ypserv should not be installed
+  ✔  package-06: Do not install tftp server
+     ✔  System Package tftp-server should not be installed
+  ×  package-07: Install syslog server package
+     ×  System Package rsyslog should be installed
+     expected that `System Package rsyslog` is installed
+.
+.
+.
+✔  sysctl-29: Disable loading kernel modules
+   ✔  Kernel Parameter kernel.modules_disabled value should eq 0
+×  sysctl-30: Magic SysRq
+   ×  Kernel Parameter kernel.sysrq value should eq 0
+
+   expected: 0
+        got: 16
+
+   (compared using ==)
+
+✔  sysctl-31a: Secure Core Dumps - dump settings
+   ✔  Kernel Parameter fs.suid_dumpable value should cmp == /(0|2)/
+↺  sysctl-31b: Secure Core Dumps - dump path
+   ↺  Skipped control due to only_if condition.
+✔  sysctl-32: kernel.randomize_va_space
+   ✔  Kernel Parameter kernel.randomize_va_space value should eq 2
+✔  sysctl-33: CPU No execution Flag or Kernel ExecShield
+   ✔  /proc/cpuinfo Flags should include NX
+
+
+Profile Summary: 25 successful controls, 28 control failures, 1 control skipped
+Test Summary: 68 successful, 57 failures, 1 skipped
+
+NOTE: source is located in linux-baseline/controls/sysctl_spec.rb
+
+ex.
+
+
+control 'sysctl-20' do
+  impact 1.0
+  title 'Disable acceptance of all IPv6 redirected packets'
+  desc 'Disable acceptance of all redirected packets these prevents Man-in-the-Middle attacks.'
+  only_if { !container_execution }
+  describe kernel_parameter('net.ipv6.conf.default.accept_redirects') do
+    its(:value) { should eq 0 }
+  end
+  describe kernel_parameter('net.ipv6.conf.all.accept_redirects') do
+    its(:value) { should eq 0 }
+  end
+end
+
+control block is a test.
+"describe" block is an audit resource name found in inspec documentation at:
+https://www.inspec.io/docs/reference/resources/kernel_parameter/
+
+NOTE: can put more than one describe block in a control block
+
+5. Stop and remove container
+> docker stop mycentos73
+> docker rm mycentos73
+
+
+Can run inspec code at the end of a chef run via the audit cookbook:
+https://github.com/chef-cookbooks/audit
+The audit cookbook allows you to run InSpec profiles as part of a Chef Client run.
+It downloads configured profiles from various sources like Chef Compliance,
+Chef Supermarket or Git and reports audit runs to Chef Compliance or Chef Automate.
+
+
+## Scan a Node via ssh
+##
+
+inspec exec linux-baseline -t ssh://root@1.22.333.4444 --key-files ~/.ssh/id_rsa
+or
+inspec exec linux-baseline \
+-t ssh://ec2-54-88-60-52.compute-1.amazonaws.com \
+--user=ec2-user \
+--key-files=./AMZN_Key.pem \
+--sudo
+
+NOTE:  This is a real inspec exec linux-baseline run from AWS EC2 instance
+
+
+Profile: DevSec Linux Security Baseline (linux-baseline)
+Version: 2.2.0
+Target:  ssh://ec2-user@ec2-54-88-60-52.compute-1.amazonaws.com:22
+
+  ✔  package-01: Do not run deprecated inetd or xinetd
+     ✔  System Package inetd should not be installed
+     ✔  System Package xinetd should not be installed
+  ✔  package-02: Do not install Telnet server
+     ✔  System Package telnetd should not be installed
+  ✔  package-03: Do not install rsh server
+     ✔  System Package telnetd should not be installed
+  ✔  package-05: Do not install ypserv server (NIS)
+     ✔  System Package ypserv should not be installed
+  ✔  package-06: Do not install tftp server
+     ✔  System Package tftp-server should not be installed
+  ✔  package-07: Install syslog server package
+     ✔  System Package rsyslog should be installed
+  ×  package-08: Install auditd (1 failed)
+     ✔  System Package audit should be installed
+     ✔  Audit Daemon Config log_file should cmp == "/var/log/audit/audit.log"
+     ✔  Audit Daemon Config log_format should cmp == "raw"
+     ✔  Audit Daemon Config flush should match /^INCREMENTAL|INCREMENTAL_ASYNC$/
+     ×  Audit Daemon Config max_log_file_action should cmp == "keep_logs"
+
+     expected: "keep_logs"
+          got: ROTATE
+
+     (compared using `cmp` matcher)
+
+     ✔  Audit Daemon Config space_left should cmp == 75
+     ✔  Audit Daemon Config action_mail_acct should cmp == "root"
+     ✔  Audit Daemon Config space_left_action should cmp == "SYSLOG"
+     ✔  Audit Daemon Config admin_space_left should cmp == 50
+     ✔  Audit Daemon Config admin_space_left_action should cmp == "SUSPEND"
+     ✔  Audit Daemon Config disk_full_action should cmp == "SUSPEND"
+     ✔  Audit Daemon Config disk_error_action should cmp == "SUSPEND"
+
+.
+.
+.
+.
+
+×  sysctl-27: Disable neighbor solicitations to send out per address
+   ×  Kernel Parameter net.ipv6.conf.default.dad_transmits value should eq 0
+
+   expected: 0
+        got: 1
+
+   (compared using ==)
+
+×  sysctl-28: Assign one global unicast IPv6 addresses to each interface
+   ×  Kernel Parameter net.ipv6.conf.default.max_addresses value should eq 1
+
+   expected: 1
+        got: 16
+
+   (compared using ==)
+
+✔  sysctl-29: Disable loading kernel modules
+   ✔  Kernel Parameter kernel.modules_disabled value should eq 0
+×  sysctl-30: Magic SysRq
+   ×  Kernel Parameter kernel.sysrq value should eq 0
+
+   expected: 0
+        got: 16
+
+   (compared using ==)
+
+✔  sysctl-31a: Secure Core Dumps - dump settings
+   ✔  Kernel Parameter fs.suid_dumpable value should cmp == /(0|2)/
+↺  sysctl-31b: Secure Core Dumps - dump path
+   ↺  Skipped control due to only_if condition.
+✔  sysctl-32: kernel.randomize_va_space
+   ✔  Kernel Parameter kernel.randomize_va_space value should eq 2
+✔  sysctl-33: CPU No execution Flag or Kernel ExecShield
+   ✔  /proc/cpuinfo Flags should include NX
+
+
+Profile Summary: 27 successful controls, 26 control failures, 1 control skipped
+Test Summary: 81 successful, 44 failures, 1 skipped
+
+
+
+## Scan a local machine via inspec
+##
+inspec exec linux-baseline
+
+
+
+## Formatting modes of inspec exec
+##
+--format=FORMAT    NOTE: Deprecated
+
+--reporter=one two:/output/file/path] cli, documentation, html, progress, json, json-min, json-rspec, junit
+
+
+> inspec exec linux-baseline --reporter=cli
+
+Profile: DevSec Linux Security Baseline (linux-baseline)
+Version: 2.2.0
+Target:  local://
+
+ ✔  package-01: Do not run deprecated inetd or xinetd
+    ✔  System Package inetd should not be installed
+    ✔  System Package xinetd should not be installed
+ ✔  package-02: Do not install Telnet server
+    ✔  System Package telnetd should not be installed
+
+> inspec exec linux-baseline --reporter=documentation
+
+System Package inetd
+  should not be installed
+
+System Package xinetd
+  should not be installed
+
+System Package telnetd
+  should not be installed
+
+> inspec exec linux-baseline --reporter=html
+
+<div id="div_group_26" class="example_group passed">
+  <dl style="margin-left: 0px;">
+  <dt id="example_group_26" class="passed">File /etc/shadow</dt>
+    <script type="text/javascript">moveProgressBar('23.8');</script>
+    <dd class="example passed"><span class="passed_spec_name">should not be readable by group</span><span class='duration'>0.00009s</span></dd>
+  </dl>
+</div>
+
+
+> inspec exec linux-baseline --reporter=progress
+........FFFFFFFFFFF................................FF.FF.FF..F....F....FFFFFFFF...FF....FFFFFF.....F.FFFFFFF.FFFFFFFFFFF.F.*..
+
+Pending: (Failures listed here are expected and do not affect your suite's status)
+
+  1) Operating System Detection Skipped control due to only_if condition.
+     # Not yet implemented
+     #
+
+
+Failures:
+
+  1) Audit Daemon Config log_file should cmp == "/var/log/audit/audit.log"
+     Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }
+
+       expected: "/var/log/audit/audit.log"
+            got:
+
+       (compared using `cmp` matcher)
+     # linux-baseline/controls/package_spec.rb:94:in `block (3 levels) in load_with_context'
+
+  2) Audit Daemon Config log_format should cmp == "raw"
+     Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }
+
+       expected: "raw"
+            got:
+
+       (compared using `cmp` matcher)
+     # linux-baseline/controls/package_spec.rb:95:in `block (3 levels) in load_with_context'
+
+
+
+> inspec exec linux-baseline --reporter=json
+{"platform":{"name":"centos","release":"7.4.1708"},"profiles":
+[{"name":"linux-baseline","version":"2.2.0",
+"sha256":"36c8083c0bae5155310b34632e4947754404fd8256f1b75dd07df969d3b41d64",
+"title":"DevSec Linux Security Baseline","maintainer":"DevSec Hardening Framework Team",
+"summary":"Test suite for best practice Linux OS hardening","license":"Apache-2.
+
+
+> inspec exec linux-baseline --reporter=json-min
+{"controls":[{"id":"package-01","profile_id":"linux-baseline",
+"profile_sha256":"36c8083c0bae5155310b34632e4947754404fd8256f1b75dd07df969d3b41d64",
+"status":"passed","code_desc":"System Package inetd should not be installed"},
+{"id":"package-01","profile_id":"linux-baseline",
+"profile_sha256":"36c8083c0bae5155310b34632e4947754404fd8256f1b75dd07df969d3b41d64",
+"status":"passed","code_desc":"System Package xinetd should not be installed"}
+
+
+
+> inspec exec linux-baseline --reporter=json-rspec
+"/opt/chefdk/embedded/lib/ruby/gems/2.4.0/gems/rspec-its-1.2.0/lib/rspec/its.rb:126:in `should'",
+"linux-baseline/controls/os_spec.rb:125:in `block (3 levels) in load_with_context'",
+"/opt/chefdk/embedded/lib/ruby/gems/2.4.0/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:254:in
+`instance_exec'","/opt/chefdk/embedded/lib/ruby/gems/2.4.0/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:254
+:in `block in run'","/opt/chefdk/embedded/lib/ruby/gems/2.4.0/gems/rs
+
+
+
+> inspec exec linux-baseline --reporter=json-junit
+
+<?xml version='1.0'?>
+<testsuites>
+  <testsuite name='linux-baseline' tests='126' failed='55'>
+    <testcase name='System Package inetd should not be installed' classname='linux-baseline.package-01' time='0.345166953'/>
+    <testcase name='System Package xinetd should not be installed' classname='linux-baseline.package-01' time='0.347338303'/>
+    <testcase name='System Package telnetd should not be installed' classname='linux-baseline.package-02' time='0.344765683'/>
+    <testcase name='System Package telnetd should not be installed' classname='linux-baseline.package-03' time='0.345806186'/>
+    <testcase name='System Package ypserv should not be installed' classname='linux-baseline.package-05' time='0.34381562'/>
+    <testcase name='System Package tftp-server should not be installed' classname='linux-baseline.package-06' time='0.348752759'/>
+    <testcase name='System Package rsyslog should be installed' classname='linux-baseline.package-07' time='0.353309838'/>
+    <testcase name='System Package audit should be installed' classname='linux-baseline.package-08' time='0.346223413'/>
+    <testcase name='Audit Daemon Config log_file should cmp == &quot;/var/log/audit/audit.log&quot;' classname='linux-baseline.package-08' time='0.016799262'>
+      <failure message='
+expected: &quot;/var/log/audit/audit.log&quot;
+     got:
+
+
+## Control Resource
+##
+          v-----  name of control
+control 'os-04' do
+  title 'Dot in PATH variable'                       <--- Title of control
+  desc "This checks if there is a dot in the PATH "  <--- description of control
+  impact 1.0                             <---- numerical impact from 0.0 to 1.0
+end
+
+
+
+## Describe Resource
+##
+Actual test to be done
+
+control '<name>' do
+  describe '<audit_resource>' do
+    if { should <matcher> }
+  end
+end
+
+## example of contains check
+##
+
+control 'os-03' do
+  title 'Check owner and permissions for /etc/passwd'
+  describe file('/etc/passwd') do
+    if { should exist }
+    if { should be_file }
+  end
+end
+
+## Negative test with should_not
+##
+
+control 'os-02' do
+  title 'Check owner and permissions for /etc/shadow'
+  describe file('/etc/shadow') do
+    if { should_not be_executable }
+  end
+end
+
+
+## Test w/ parameters
+##
+
+control 'os-03' do
+  title 'Check owner and permissions for /etc/passwd'
+  describe file('/etc/passwd') do
+    if { should_not be_readable.by('owner') }
+  end
+end
+
+## Get info on audit resource
+##
+> inspec shell
+inspec> help file
+
+inspec> help file
+Name: file
+
+Description:
+
+Use the file InSpec audit resource to test all system file types, including files, directories, symbolic links, named pipes, sockets, character devices, block devices, and doors.
+
+Example:
+
+describe file('path') do
+  it { should exist }
+  it { should be_file }
+  it { should be_readable }
+  it { should be_writable }
+  it { should be_executable.by_user('root') }
+  it { should be_owned_by 'root' }
+  its('mode') { should cmp '0644' }
+end
+
+
+Web Reference:
+
+https://www.inspec.io/docs/reference/resources/file
+
+
+
+## Its form: non-default usage of an attribute
+##
+
+control 'os-02' do
+  title 'Check owner and permissions for /etc/shadow'
+  describe file('/etc/shadow') do
+    its('group') { should eq 'root' }
+  end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+###############################################################
+## Inspec: Create Compliance Profile
+###############################################################
+
+
+
+
+
+
+
+
+
 
 
 
