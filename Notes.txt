@@ -2569,6 +2569,164 @@ NOTE: See Test Kitchen Verifier fo Inspec: https://github.com/chef/kitchen-inspe
 
 
 
+##################################################################
+##  Capture Machine Config w/ HashiCorp Packer
+##################################################################
+
+Packer is an image manager
+packer.io
+
+## Create linux virtal machine so that image can be captured by packer
+##
+
+1. Download desktop iso image from
+http://releases.ubuntu.com/xenial/
+
+
+2. Make updates to image and shutdown
+
+3. In VirtualBox, export image to .ova format (OVF 2.0)
+  File > Export Appliance >
+      File location:  xyz.ova
+      File format:    OVF 2.0
+                            > Continue  > Export
+
+4. Create 2 files for packer (create a directory first)
+      mkdir ubuntu1604_desktop
+      touch ubuntu1604_desktop.json
+      touch ubuntu1604_desktop.vagrantfile
+
+NOTE:  ubuntu1604_desktop.json is file used by packer
+
+
+ubuntu1604_desktop.vagrantfile:
+Vagrant.configure("2") do |config|
+  config.vm.define "vagrant-ubuntu1604-desktop"
+  config.vm.box = "ubuntu1604-desktop"
+
+  config.vm.provider :virtualbox do |v, override|
+    v.gui = true
+    v.customize ["modifyvm", :id, "--memory", 1024]
+    v.customize ["modifyvm", :id, "--cpus", 1]
+    v.customize ["modifyvm", :id, "--vram", "128"]
+    v.customize ["setextradata", "global", "GUI/MaxGuestResolution", "any"]
+    v.customize ["setextradata", :id, "CustomVideoMode1", "1024x768x32"]
+    v.customize ["modifyvm", :id, "--ioapic", "on"]
+    v.customize ["modifyvm", :id, "--rtcuseutc", "on"]
+    v.customize ["modifyvm", :id, "--accelerate3d", "off"]
+    v.customize ["modifyvm", :id, "--accelerate2dvideo", "off"]
+  end
+end
+
+
+ubuntu1604_desktop.json:
+{
+  "builders": [
+    {
+      "type": "virtualbox-ovf",
+      "source_path": "/Users/map/Documents/ubuntu1604_desktop.ova",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+      "guest_additions_mode": "disable",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--memory", "1024" ],
+        [ "modifyvm", "{{.Name}}", "--cpus", "1" ]
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "keep_input_artifact": false,
+      "output": "ubuntu1604_desktop.box",
+      "type": "vagrant",
+      "vagrantfile_template": "ubuntu1604_desktop.vagrantfile"
+    }
+  ]
+}
+
+NOTE: "source_path":  in  ubuntu1604_desktop.json should be the location
+of the actual exported .ova file.
+
+
+5. Validate that json file is correct for packer:
+> packer validate ubuntu1604_desktop.json
+
+6. Generate box file with packer:
+> packer build ubuntu1604_desktop.json
+
+NOTE: packer outputs a file as packer-virtualbox-ovf-1122334455.ovf
+Test kitchen uses vagrant tools to interact with VMs instead of virtualbox
+directly.  Ultimate output is ubuntu1604_desktop.box.  The .box file is just
+a tar file that contains:
+ - Vagrantfile
+ - box.ovf
+ - metadata.json
+ - packer-virtualbox-ovf-1122334455-disk2.vmdk
+
+
+
+## Verify Linux Desktop VM
+##
+
+1. cd to where .box file is created
+> cd ubuntu1604_desktop
+
+2. vagrant box add --name ubuntu1604_desktop ubuntu1604_desktop.box
+
+NOTE: copies .box file to Vagrant "central store" that vagrant uses
+to create new vm instances.
+
+3. List vagrant box to check that it is available:
+> vagrant box list
+
+4. Test vagrant box by creating a new Vagrantfile:
+  a. mkdir testbox
+  b. cd testbox
+  c. vagrant init ubuntu1604_desktop
+  c. Review Vagrant file
+  d. Review Vagrant file
+  e. Spin up box
+    > vagrant up
+  f. Login
+    > vagrant ssh
+  g. Destroy
+    > vagrant destroy
+
+5. Remove vagrant box:
+  > vagrant box remove ubuntu1604_desktop
+
+6. To recreate box again :
+  > vagrant box add --name ubuntu1604_desktop ubuntu1604_desktop.box
+
+
+
+##################################################################
+##  Real World: Manage Dev Env w/ Chef
+##################################################################
+
+Plan:
+  - create wrapper cookbook to manage:
+    - cookbook to install chefdk
+    - cookbook to install git
+    - cookbook to install atom
+  - Utilize Berkshelf (dependency manager)
+  - Multi-platform coding
+    - Linux
+    - macOS
+
+## Create chefk_workstation wrapper cookbook 
+##
+
+
+
+
+
+
+
+
+
+
 
 
 
