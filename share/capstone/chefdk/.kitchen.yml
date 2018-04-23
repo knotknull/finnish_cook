@@ -28,5 +28,5 @@ suites:
       - recipe[chefdk::default]
     verifier:
       inspec_tests:
-        - test/integration/default
+        - path: ../chef_workstation_cp
     attributes:
