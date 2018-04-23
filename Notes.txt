@@ -2880,17 +2880,53 @@ git/
   cookbook_path="$(pwd)/berks-cookbooks"\ --override-runlist chef_workstation
 
 
-
-
 ## Create git cookbook
 ##
 
+1. Write tests in capstone/git/test/integration/default/default_test.rb:
+describe(command('git --version')) do
+  its('stdout') { should match(/git version/) }
+end
+
+if os.debian?
+  describe(package('git')) do
+    it { should be_installed }
+  end
+end
+
+if os.family == 'darwin'
+  describe(command('pkgutil --pkg-info=com.apple.pkg.CLTools_Executables')) do
+    its('exit_status') { should be 0 }
+  end
+end
+
+2. Test by running kitchen converge / kitchen verify in git directory
+
+3. Update capstone/git/recipes/default.rb:
+
+if node['platform_family'] == 'debian'
+  include_recipe 'apt'
+  package 'git'
+elsif node['platform_family'] == 'mac_os_x'
+  include_recipe 'build_essential'
+end
+
+NOTE: there is include_recipe calls, this means updating Berksfile and
+metadata.rb !!!!
+
+4. Update capstone/git/Berksfile:
+  NOTE: no update becuase apt and build_essential is in chef supermarket
+
+5. Update capstone/git/metadata.rb:
+
+depends 'apt', '~> 6.0.0'
+depends 'build-essential', '~> 8.0.0'
 
 
 
 
-
-
+## Create atom cookbook
+##
 
 
 
