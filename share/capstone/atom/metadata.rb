@@ -18,3 +18,6 @@ chef_version '>= 12.14' if respond_to?(:chef_version)
 # a Supermarket.
 #
 # source_url 'https://github.com/<insert_org_here>/atom'
+
+depends 'apt', '~> 6.0.0'
+depends 'zip_app', '~> 0.2.4'
