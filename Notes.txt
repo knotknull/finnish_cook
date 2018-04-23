@@ -2928,9 +2928,50 @@ depends 'build-essential', '~> 8.0.0'
 ## Create atom cookbook
 ##
 
+1. Write tests in capstone/atom/test/integration/default/default_test.rb:
+if os.debian?
+  describe package('atom') do
+    it { should be_installed }
+  end
+end
+
+if os.name == 'mac_os_x'
+  describe file('/Applications/Atom.app') do
+    it { should exist }
+  end
+end
+
+
+2. Test by running kitchen converge / kitchen verify in git directory
+
+3. Add depends statements to  capstone/git/metadata.rb:
+depends 'apt', '~> 6.0.0'
+depends 'zip_app', '~> 0.2.4'
+
+NOTE: Don't need include for these cookbooks and both are located in supermarket
 
 
 
+4. Update capstone/atom/recipes/default.rb:
+
+case node['platform_family']
+when 'debian'
+  apt_repository 'atom-ppa' do
+    uri 'http://ppa.launchpad.net/webupd8team/atom/ubuntu'
+    distribution node['lsb']['codename']
+    components['main']
+    keyserver 'keyserver.ubuntu.com'
+    key 'EEA14886'
+  end
+
+  package 'atom'
+when 'mac_os_x'
+  zip_app_package 'atom' do
+    source 'https://github.com/atom/atom/releases/download/v1.12.9/atom-mac.zip'
+  end
+end
+
+NOTE: No include_file !!
 
 
 
