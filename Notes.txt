@@ -2715,8 +2715,42 @@ Plan:
     - Linux
     - macOS
 
-## Create chefk_workstation wrapper cookbook 
+## Create chefk_workstation wrapper cookbook
 ##
+
+1. mkdir capstone && cd capstone
+
+2. If ~/.chef/config.rb conaints dokken setting, comment out to:
+# chefdk.generator_cookbook = '~/code_generator'
+
+3. Generate chef_workstation cookbook:
+> chef generate cookbook chef_workstation
+
+4. cd chef_workstation and update .kithcen.yml to:
+platforms:
+  - name: ubuntu-1604-desktop
+    driver:
+      box: ubuntu1604-desktop
+  - name: macos1012-desktop
+    driver:
+      cache_directory: false
+      box: macos1012-desktop
+
+5. Verify by running kitchen list
+> kitchen lists
+Instance                     Driver   Provisioner  Verifier  Transport  Last Action    Last Error
+default-ubuntu-1604-desktop  Vagrant  ChefZero     Inspec    Ssh        <Not Created>  <None>
+default-macos1012-desktop    Vagrant  ChefZero     Inspec    Ssh        <Not Created>  <None>
+
+6. Run kitchen create for ubuntu:
+> kitchen create ubuntu
+
+7. Verify with kitchen list  (clean up w/ kitchen destroy)
+
+
+## Berkshelf and dependency management
+##
+
 
 
 
