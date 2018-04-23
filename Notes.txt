@@ -2750,6 +2750,145 @@ default-macos1012-desktop    Vagrant  ChefZero     Inspec    Ssh        <Not Cre
 
 ## Berkshelf and dependency management
 ##
+1. Create Berkshelf depenency cookbooks:
+
+chef generate cookbook git
+chef generate cookbook atom
+chef generate cookbook chefdk
+
+2. Update .kithcen.yml platforms section in git / atom / chefdk
+   cookbooks to :
+
+platforms:
+  - name: ubuntu-1604-desktop
+    driver:
+      box: ubuntu1604-desktop
+  - name: macos1012-desktop
+    driver:
+      cache_directory: false
+      box: macos1012-desktop
+
+5. Verify by running kitchen list in each depenency directory
+
+> cd atom
+> kitchen list
+Instance                     Driver   Provisioner  Verifier  Transport  Last Action    Last Error
+default-ubuntu-1604-desktop  Vagrant  ChefZero     Inspec    Ssh        <Not Created>  <None>
+default-macos1012-desktop    Vagrant  ChefZero     Inspec    Ssh        <Not Created>  <None>
+> cd ../git
+> kitchen list
+Instance                     Driver   Provisioner  Verifier  Transport  Last Action    Last Error
+default-ubuntu-1604-desktop  Vagrant  ChefZero     Inspec    Ssh        <Not Created>  <None>
+default-macos1012-desktop    Vagrant  ChefZero     Inspec    Ssh        <Not Created>  <None>
+> cd ../chefdk
+> kitchen list
+Instance                     Driver   Provisioner  Verifier  Transport  Last Action    Last Error
+default-ubuntu-1604-desktop  Vagrant  ChefZero     Inspec    Ssh        <Not Created>  <None>
+default-macos1012-desktop    Vagrant  ChefZero     Inspec    Ssh        <Not Created>  <None>
+
+
+6. Update wrapper cookbook capstone/chef_workstation to run 3 new cookbooks.
+Update chef_workstation/recipes/default.rb:
+
+include_recipe 'git'
+include_recipe 'chefdk'
+include_recipe 'atom'
+
+6a. Need to update where the location of git / chefdk / atom are.
+Update chef_workstation/Berksfile:
+
+cookbook 'atom', path: '../atom'
+cookbook 'git', path: '../git'
+cookbook 'chefdk', path: '../chefdk'
+
+
+
+## Depends statement
+##
+
+1. To wire dependencies, need to update capstone/chef_workstation/metadata.rb:
+                  v-------  is same as >0.1.0 and < 1.0
+depends 'git', '~> 0.1' # '>0.1.0',  '<1.0'
+depends 'atom', '~> 0.1' # '>0.1.0',  '<1.0'
+depends 'chefdk', '~> 0.1' # '>0.1.0',  '<1.0'
+
+
+NOTE:  include_recipe in chef_workstation/recipes/default.rb requires updates
+to:
+    - chef_workstation/Berksfile      ## Location of file
+    - chef_workstation/metadata.rb    ## Version of file
+
+
+## Perform Chef runs locally
+##
+
+0. How to run wrapper cookbook w/ all dependencies
+
+1. cd capstone/chefk_workstation and load dependencies with berks tool
+NOTE: add solo.sh to capstone/chefk_workstation/
+
+> berks vendor
+Resolving cookbook dependencies...
+Fetching 'atom' from source at ../atom
+Fetching 'chef_workstation' from source at .
+Fetching 'chefdk' from source at ../chefdk
+Fetching 'git' from source at ../git
+Using atom (0.1.0) from source at ../atom
+Using chefdk (0.1.0) from source at ../chefdk
+Using git (0.1.0) from source at ../git
+Using chef_workstation (0.1.0) from source at .
+Vendoring atom (0.1.0) to /vagrant/share/capstone/chef_workstation/berks-cookbooks/atom
+Vendoring chef_workstation (0.1.0) to /vagrant/share/capstone/chef_workstation/berks-cookbooks/chef_workstation
+Vendoring chefdk (0.1.0) to /vagrant/share/capstone/chef_workstation/berks-cookbooks/chefdk
+Vendoring git (0.1.0) to /vagrant/share/capstone/chef_workstation/berks-cookbooks/git
+
+
+NOTE: This commands pulls in all dependencies and creates Berksfile.lock
+which contains all dependencies and dependency graph
+
+DEPENDENCIES
+  atom
+    path: ../atom
+  chef_workstation
+    path: .
+    metadata: true
+  chefdk
+    path: ../chefdk
+  git
+    path: ../git
+
+GRAPH
+  atom (0.1.0)
+  chef_workstation (0.1.0)
+    atom (~> 0.1)
+    chefdk (~> 0.1)
+    git (~> 0.1)
+  chefdk (0.1.0)
+  git (0.1.0)
+
+
+NOTE: berks vendor == pulling cookbooks locally.  All dependencies are in
+chef_workstation/berks-cookbooks/
+atom/
+chef_workstation/
+chefdk/
+git/
+
+2. Run chef-client locally:
+> cd chef_workstation
+> sudo chef-client --local-mode --config-option \
+  cookbook_path="$(pwd)/berks-cookbooks"\ --override-runlist chef_workstation
+
+
+
+
+## Create git cookbook
+##
+
+
+
+
+
 
 
 

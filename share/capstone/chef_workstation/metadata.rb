@@ -18,3 +18,7 @@ chef_version '>= 12.1' if respond_to?(:chef_version)
 # a Supermarket.
 #
 # source_url 'https://github.com/<insert_org_here>/chef_workstation'
+
+depends 'git', '~> 0.1' # '>0.1.0',  '<1.0'
+depends 'atom', '~> 0.1' # '>0.1.0',  '<1.0'
+depends 'chefdk', '~> 0.1' # '>0.1.0',  '<1.0'
