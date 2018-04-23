@@ -3044,6 +3044,113 @@ depends 'dmg', '~> 3.1.0'
 
 
 
+##################################################################
+##  Troubleshooting Chef
+##################################################################
+
+Chef-shell: interative chef session
+
+> chef-shell
+chef (13.6.4)> node['ipaddress']
+ => "10.0.2.15"
+chef (13.6.4)> node['memory']
+ => {"swap"=>{"cached"=>"992kB", "total"=>"1572860kB", "free"=>"1571228kB"},
+ "hugepages"=>{"total"=>"0", "free"=>"0", "reserved"=>"0", "surplus"=>"0"},
+ "total"=>"500108kB", "free"=>"34012kB", "buffers"=>"5212kB",
+ "cached"=>"234936kB", "active"=>"218012kB", "inactive"=>"132252kB",
+ "dirty"=>"0kB", "writeback"=>"0kB", "anon_pages"=>"109324kB",
+ "mapped"=>"27592kB", "slab"=>"78056kB", "slab_reclaimable"=>"43448kB",
+ "slab_unreclaim"=>"34608kB", "page_tables"=>"4548kB", "nfs_unstable"=>"0kB",
+ "bounce"=>"0kB", "commit_limit"=>"1822912kB", "committed_as"=>"517536kB",
+ "vmalloc_total"=>"34359738367kB", "vmalloc_used"=>"9160kB",
+ "vmalloc_chunk"=>"34359721980kB", "hugepage_size"=>"2048kB"}
+chef (13.6.4)>
+
+
+
+## can load a module to use w/ chef-spec_helper_policyfile
+chef (13.6.4)> require 'pry'
+chef (13.6.4)> pry
+chef (13.6.4)> node.attributes  ## pages thru results
+=> {"tags"=>[],
+ "cpu"=>
+  {"0"=>
+    {"vendor_id"=>"GenuineIntel",
+     "family"=>"6",
+=> {"tags"=>[],
+ "cpu"=>
+  {"0"=>
+    {"vendor_id"=>"GenuineIntel",
+     "family"=>"6",
+     "model"=>"61",
+     "model_name"=>"Intel(R) Core(TM) i5-5257U CPU @ 2.70GHz",
+     "stepping"=>"4",
+     "mhz"=>"2700.000",
+     "cache_size"=>"3072 KB",
+     "physical_id"=>"0",
+     "core_id"=>"0",
+
+
+chef (13.6.4)> node.attributes.sort.each { |k,v| p k}; nil
+NOTE: run w/ ruby code to just get top level values
+
+debug values:
+chef (13.6.4)> node.debug_value('ipaddress')
+
+pry(main)> node.debug_value('ipaddress')
+=> [["default", :not_present],
+ ["env_default", :not_present],
+ ["role_default", :not_present],
+ ["force_default", :not_present],
+ ["normal", :not_present],
+ ["override", :not_present],
+ ["role_override", :not_present],
+ ["env_override", :not_present],
+ ["force_override", :not_present],
+ ["automatic", "10.0.2.15"]]
+
+
+Chef debugging tips:
+stevendanna.github.io/blog/2012/01/28/shef-debugging-tips-1/
+
+
+## Profiling chef cookbooks
+##
+
+1. Update .kitchen.yml of cookbook to profile, add profile_ruby: true
+
+provisioner:
+  name: chef_zero
+  # You may wish to disable always updating cookbooks in CI or other testing environments.
+  # For example:
+  #   always_update_cookbooks: <%= !ENV['CI'] %>
+  always_update_cookbooks: true
+  profile_ruby: true
+
+
+
+[[  RESOURCES  ]]
+
+  Chef Open Training Materials
+  https://www.chef.io/contact/open-training
+
+  Git Workflow
+  https://learn.chef.io/skills/tools-for-open-source/
+
+  O'Reilly Collaborating with Git
+  http://shop.oreilly.com/product/0636920034872.do
+
+  Joy of Automating
+  https://www.youtube.com/watch?v=ucd4v9R-XNA
+
+
+
+
+
+
+
+
+
 
 
 
